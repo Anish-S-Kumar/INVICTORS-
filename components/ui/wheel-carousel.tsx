@@ -5,7 +5,17 @@ import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowRight, ChevronDown, Compass, Target, Sparkles, Layers, CalendarDays, Trophy } from "lucide-react"
+import {
+  ArrowRight,
+  ChevronDown,
+  Compass,
+  Target,
+  Sparkles,
+  Layers,
+  CalendarDays,
+  Trophy,
+  Fingerprint,
+} from "lucide-react"
 import { NAVIGATION_CARDS, CLUB_METADATA } from "@/lib/content"
 
 interface WheelCarouselProps {
@@ -19,10 +29,11 @@ export function WheelCarousel({
 }: WheelCarouselProps) {
   const router = useRouter()
   const [selectedIndex, setSelectedIndex] = useState(0)
-  const [scrollOffset, setScrollOffset] = useState(0) // fractional item offset
+  const [scrollOffset, setScrollOffset] = useState(0)
   const [isDragging, setIsDragging] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [snapPulse, setSnapPulse] = useState(false)
+  const [isSmallHeight, setIsSmallHeight] = useState(false)
 
   const pointerStartY = useRef(0)
   const pointerStartTime = useRef(0)
@@ -30,6 +41,16 @@ export function WheelCarousel({
   const velocity = useRef(0)
   const animFrame = useRef<number | null>(null)
   const lastIndex = useRef(0)
+
+  // Track small height viewports (< 640px)
+  useEffect(() => {
+    const checkHeight = () => {
+      setIsSmallHeight(window.innerHeight < 640)
+    }
+    checkHeight()
+    window.addEventListener("resize", checkHeight)
+    return () => window.removeEventListener("resize", checkHeight)
+  }, [])
 
   // Vibrate / haptic helper
   const triggerHaptic = useCallback(() => {
@@ -55,14 +76,12 @@ export function WheelCarousel({
       const animateSnap = (time: number) => {
         const elapsed = time - startTime
         const progress = Math.min(1, elapsed / duration)
-        // ease-out cubic
         const ease = 1 - Math.pow(1 - progress, 3)
         const nextVal = startVal + (nearest - startVal) * ease
 
         currentOffset.current = nextVal
         setScrollOffset(nextVal)
 
-        // normalize index
         const total = items.length
         const normIdx = ((Math.round(nextVal) % total) + total) % total
         if (normIdx !== lastIndex.current) {
@@ -100,13 +119,12 @@ export function WheelCarousel({
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging) return
     const deltaY = e.clientY - pointerStartY.current
-    const itemHeight = 65 // pixels per item
+    const itemHeight = isSmallHeight ? 48 : 56
     const deltaItems = -deltaY / itemHeight
 
     const nextVal = currentOffset.current + deltaItems
     setScrollOffset(nextVal)
 
-    // Calculate velocity for inertial throw
     const now = performance.now()
     const dt = now - pointerStartTime.current
     if (dt > 10) {
@@ -128,9 +146,7 @@ export function WheelCarousel({
   const handlePointerUp = () => {
     if (!isDragging) return
     setIsDragging(false)
-
-    // Apply inertia throw based on velocity
-    const throwDistance = velocity.current * 180
+    const throwDistance = velocity.current * 160
     const targetOffset = currentOffset.current + throwDistance
     snapToNearest(targetOffset)
   }
@@ -141,69 +157,71 @@ export function WheelCarousel({
     }
   }, [])
 
-  // Icon mapping for selected card
-  const getIcon = (name: string) => {
+  // Icon mapping for selected card medallion
+  const getMedallionIcon = (name: string) => {
     switch (name) {
       case "Compass":
-        return <Compass className="w-12 h-12 text-amber-400" />
+        return <Compass className="w-8 h-8 text-amber-300" />
       case "Target":
-        return <Target className="w-12 h-12 text-amber-400" />
+        return <Target className="w-8 h-8 text-amber-300" />
+      case "Fingerprint":
+        return <Fingerprint className="w-8 h-8 text-amber-300" />
       case "Sparkles":
-        return <Sparkles className="w-12 h-12 text-amber-400" />
+        return <Sparkles className="w-8 h-8 text-amber-300" />
       case "Layers":
-        return <Layers className="w-12 h-12 text-amber-400" />
+        return <Layers className="w-8 h-8 text-amber-300" />
       case "CalendarDays":
-        return <CalendarDays className="w-12 h-12 text-amber-400" />
+        return <CalendarDays className="w-8 h-8 text-amber-300" />
       case "Trophy":
-        return <Trophy className="w-12 h-12 text-amber-400" />
+        return <Trophy className="w-8 h-8 text-amber-300" />
       default:
-        return <Sparkles className="w-12 h-12 text-amber-400" />
+        return <Sparkles className="w-8 h-8 text-amber-300" />
     }
   }
 
   const selectedCard = items[selectedIndex]
-
-  // Visible items range [-2.5 ... 2.5]
   const total = items.length
-  const visibleSlots = [-2, -1, 0, 1, 2]
+  // 5 visible names normally, 3 on very small screens
+  const visibleSlots = isSmallHeight ? [-1, 0, 1] : [-2, -1, 0, 1, 2]
 
   return (
     <div
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-      className={`relative w-full h-full overflow-hidden select-none touch-none pb-[env(safe-area-inset-bottom)] flex flex-col justify-between ${className}`}
+      className={`relative w-full h-full grid grid-rows-[minmax(0,1.05fr)_minmax(0,1fr)] px-5 select-none overflow-hidden touch-none ${className}`}
     >
-      {/* Soft icon crossfade background for selected card */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedCard.id}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            transition={{ duration: 0.4 }}
-          >
-            {getIcon(selectedCard.iconName)}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-
-      {/* ============================================================== */}
-      {/* CENTERPIECE: INVICTORS LOGO (60-65vw) + MOTTO + SLOGAN           */}
-      {/* Sits at z=10, slightly behind left disk labels (z=20)          */}
-      {/* ============================================================== */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10 px-4">
-        {/* Logo Container */}
-        <div className="relative flex items-center justify-center mb-3">
-          <div className="absolute w-[68vw] max-w-[280px] aspect-square rounded-full border border-amber-500/25 animate-spin-slow pointer-events-none" />
-          <div className="absolute w-[64vw] max-w-[260px] aspect-square rounded-full border border-dashed border-amber-400/20 animate-spin-reverse pointer-events-none" />
-          <div className="absolute w-[58vw] max-w-[240px] aspect-square rounded-full bg-amber-500/10 blur-xl animate-pulse-gold pointer-events-none" />
-
+      {/* =================================================================== */}
+      {/* ZONE A (TOP, IDENTITY BLOCK): Centered, fills space under header     */}
+      {/* Logo, 12px gap, Motto on ONE line, 8px gap, Slogan in 2 lines       */}
+      {/* =================================================================== */}
+      <div
+        data-debug="zone-a"
+        className="relative w-full h-full flex flex-col items-center justify-center min-h-0 pt-0.5 pb-2.5 z-10"
+      >
+        {/* Logo Emblem: Diameter = min(54vw, 0.62 * zoneA height) */}
+        <div
+          data-debug="logo"
+          className="relative flex items-center justify-center"
+          style={{
+            width: isSmallHeight ? "min(36vw, 120px)" : "min(50vw, 23vh, 175px)",
+            height: isSmallHeight ? "min(36vw, 120px)" : "min(50vw, 23vh, 175px)",
+          }}
+        >
+          {/* Masked Breathing Glow so it never bleeds into Header or Zone B */}
           <div
-            className={`relative w-[60vw] max-w-[240px] aspect-square rounded-full overflow-hidden border-2 border-amber-500/60 shadow-[0_0_30px_rgba(212,162,76,0.4)] transition-transform duration-200 ${
-              snapPulse ? "scale-[1.02]" : "scale-100"
+            className="absolute inset-0 rounded-full bg-amber-500/20 blur-xl animate-pulse-gold pointer-events-none"
+            style={{
+              maskImage: "radial-gradient(circle, black 60%, transparent 100%)",
+              WebkitMaskImage: "radial-gradient(circle, black 60%, transparent 100%)",
+            }}
+          />
+
+          {/* Rotating thin rings */}
+          <div className="absolute inset-[-8%] rounded-full border border-amber-500/25 animate-spin-slow pointer-events-none" />
+          <div className="absolute inset-[-4%] rounded-full border border-dashed border-amber-400/20 animate-spin-reverse pointer-events-none" />
+
+          {/* Logo container */}
+          <div
+            className={`relative w-full h-full rounded-full overflow-hidden border-2 border-amber-500/60 shadow-[0_0_25px_rgba(212,162,76,0.4)] transition-transform duration-200 ${
+              snapPulse ? "scale-[1.03]" : "scale-100"
             }`}
           >
             <Image
@@ -211,146 +229,185 @@ export function WheelCarousel({
               alt="INVICTORS Emblem"
               fill
               priority
+              sizes="185px"
               className="object-cover"
             />
           </div>
         </div>
 
-        {/* Motto: DECODE. INNOVATE. OVERCOME. */}
-        <div className="font-display text-xs sm:text-sm font-bold tracking-[0.25em] text-gradient-gold uppercase drop-shadow-[0_0_8px_rgba(212,162,76,0.35)] text-center">
-          {CLUB_METADATA.motto}
+        {/* 12px Gap -> Motto "DECODE. INNOVATE. OVERCOME." (ONE line, gold) */}
+        <div data-debug="motto" className="mt-3 text-center px-2">
+          <p className="font-display font-bold tracking-[0.2em] text-gradient-gold uppercase whitespace-nowrap text-[clamp(11px,3.4vw,13.5px)] drop-shadow-[0_0_8px_rgba(212,162,76,0.35)]">
+            {CLUB_METADATA.motto}
+          </p>
         </div>
 
-        {/* Hero Official Club Slogan */}
-        <p className="font-display text-xs sm:text-sm font-bold tracking-wider text-silver-100 text-center max-w-xs mt-1 leading-snug drop-shadow-md">
-          &ldquo;{CLUB_METADATA.slogan}&rdquo;
-        </p>
+        {/* 8px Gap -> Slogan "Unravel the Clues. Hack the Rules. Build the Future." */}
+        {/* Exactly TWO balanced lines in silver-100, max-width 86vw */}
+        <div data-debug="slogan" className="mt-2 text-center max-w-[86vw] px-2">
+          <p className="font-display font-bold text-silver-100 leading-snug text-balance text-[clamp(13px,3.8vw,15px)] drop-shadow-md">
+            Unravel the Clues. Hack the Rules.
+            <br />
+            Build the Future.
+          </p>
+        </div>
       </div>
 
-      {/* ============================================================== */}
-      {/* LEFT EDGE ARC DISK: Six names curving along an arc             */}
-      {/* ============================================================== */}
+      {/* =================================================================== */}
+      {/* ZONE B (BOTTOM, DISK + MEDALLION + BUTTON): Confined strictly here   */}
+      {/* Left: Curved Disk (apex at 14vw, labels <= 52vw)                    */}
+      {/* Right: 64px Icon Medallion + 2-digit index underneath               */}
+      {/* Bottom: Full-width tactile Open Button                              */}
+      {/* =================================================================== */}
       <div
-        className="absolute left-0 top-1/2 -translate-y-1/2 w-64 h-[340px] z-20 pointer-events-auto flex items-center"
-        style={{
-          maskImage:
-            "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)",
-        }}
+        data-debug="zone-b"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        className="relative w-full h-full flex flex-col justify-between min-h-0 overflow-hidden z-20"
       >
-        <div className="relative w-full h-full">
-          {visibleSlots.map((slot) => {
-            const rawIndex = Math.round(scrollOffset) + slot
-            const actualIndex = ((rawIndex % total) + total) % total
-            const card = items[actualIndex]
-
-            // Precise offset relative to continuous scroll
-            const offsetFromCenter = rawIndex - scrollOffset
-            const y = offsetFromCenter * 62 // vertical spacing
-
-            // Arc geometry: apex reaches farthest right when offsetFromCenter is 0
-            // Curve equation: x = cos(angle)
-            const angle = (offsetFromCenter * Math.PI) / 6.5
-            const arcOffset = Math.cos(angle) * 38 // shifts right toward center
-            const x = Math.max(0, arcOffset)
-
-            const isSelected = Math.abs(offsetFromCenter) < 0.4
-            const distance = Math.abs(offsetFromCenter)
-            const opacity = Math.max(0.15, 1 - distance * 0.38)
-            const scale = Math.max(0.75, 1 - distance * 0.08)
-
-            return (
-              <div
-                key={`${slot}-${actualIndex}`}
-                onClick={() => {
-                  if (isSelected) {
-                    router.push(card.href)
-                  } else {
-                    snapToNearest(rawIndex)
-                  }
-                }}
-                style={{
-                  transform: `translate3d(${x}px, ${y + 140}px, 0) scale(${scale})`,
-                  opacity: opacity,
-                  transition: isDragging ? "none" : "transform 0.25s ease-out, opacity 0.25s ease-out",
-                }}
-                className="absolute left-2 flex items-center gap-2.5 py-2.5 px-2 rounded-xl cursor-pointer min-h-[44px]"
-              >
-                {/* Marker dot on selected */}
-                {isSelected ? (
-                  <motion.div
-                    layoutId="marker-dot"
-                    className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_10px_#d4a24c] shrink-0"
-                  />
-                ) : (
-                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500/30 shrink-0" />
-                )}
-
-                {/* Index number & title with text shadow to ensure crisp legibility over logo */}
-                <span
-                  className={`font-mono text-xs font-bold ${
-                    isSelected ? "text-amber-300" : "text-amber-500/40"
-                  }`}
-                  style={{ textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}
-                >
-                  {card.number}
-                </span>
-
-                <span
-                  className={`font-display text-xs sm:text-sm font-bold tracking-wide line-clamp-1 ${
-                    isSelected
-                      ? "text-amber-100 font-extrabold text-shadow-md"
-                      : "text-amber-400/45"
-                  }`}
-                  style={{
-                    textShadow: isSelected
-                      ? "0 0 14px rgba(212,162,76,0.6), 0 2px 10px rgba(0,0,0,0.95)"
-                      : "0 2px 8px rgba(0,0,0,0.9)",
-                  }}
-                >
-                  {card.shortTitle || card.title}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Swipe disk hint (fades out after first interaction) */}
-      <AnimatePresence>
-        {!hasInteracted && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute left-6 top-[22%] z-20 flex items-center gap-1.5 text-[11px] font-display text-amber-300/80 tracking-widest pointer-events-none animate-pulse"
+        {/* Main interactive area containing Disk on left and Medallion on right */}
+        <div className="relative w-full flex-1 min-h-0 flex items-center">
+          {/* LEFT CURVED DISK: Confined to Zone B, apex at 14vw */}
+          <div
+            data-debug="disk"
+            className="absolute left-0 inset-y-0 w-[58vw] max-w-[260px] pointer-events-auto flex items-center"
+            style={{
+              maskImage:
+                "linear-gradient(to bottom, transparent, black 16%, black 84%, transparent)",
+              WebkitMaskImage:
+                "linear-gradient(to bottom, transparent, black 16%, black 84%, transparent)",
+            }}
           >
-            <ChevronDown className="w-3.5 h-3.5 text-amber-400" />
-            <span>Swipe the disk</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <div className="relative w-full h-full flex items-center">
+              {visibleSlots.map((slot) => {
+                const rawIndex = Math.round(scrollOffset) + slot
+                const actualIndex = ((rawIndex % total) + total) % total
+                const card = items[actualIndex]
 
-      {/* ============================================================== */}
-      {/* BOTTOM THUMB-REACH CONTROLS: Gold "Open" Button + Title Pill   */}
-      {/* ============================================================== */}
-      <div className="mt-auto pb-6 pt-2 px-5 flex flex-col items-center gap-2.5 z-30 pointer-events-auto">
-        {/* Selected card title chip (No descriptions on dashboard) */}
-        <div className="text-center">
-          <div className="font-display text-xs text-amber-400 font-semibold tracking-wider">
-            {selectedCard.number} // {selectedCard.shortTitle || selectedCard.title}
+                const offsetFromCenter = rawIndex - scrollOffset
+                const itemSpacing = isSmallHeight ? 46 : 56
+                const y = offsetFromCenter * itemSpacing
+
+                // Apex reaches farthest right (14vw from left) when offsetFromCenter is 0
+                // Curvature drops off smoothly as you move above/below center
+                const curveFactor = Math.cos(offsetFromCenter * (Math.PI / 6))
+                const x = Math.max(0, curveFactor * 18) // apex shift
+
+                const isSelected = Math.abs(offsetFromCenter) < 0.4
+                const distance = Math.abs(offsetFromCenter)
+                const opacity = isSelected ? 1 : Math.max(0.18, 0.55 - distance * 0.16)
+                const scale = Math.max(0.78, 1 - distance * 0.08)
+
+                const cardTitle = card.shortTitle || card.title
+
+                return (
+                  <div
+                    key={`${slot}-${actualIndex}`}
+                    onClick={() => {
+                      if (isSelected) {
+                        router.push(card.href)
+                      } else {
+                        snapToNearest(rawIndex)
+                      }
+                    }}
+                    style={{
+                      transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`,
+                      opacity: opacity,
+                      transition: isDragging
+                        ? "none"
+                        : "transform 0.22s ease-out, opacity 0.22s ease-out",
+                    }}
+                    className="absolute left-1 flex items-center gap-2.5 py-2 px-1 cursor-pointer max-w-[52vw]"
+                  >
+                    {/* Gold marker dot on selected */}
+                    {isSelected ? (
+                      <motion.div
+                        layoutId="mobile-marker-dot"
+                        className="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_10px_#d4a24c] shrink-0"
+                      />
+                    ) : (
+                      <div className="w-1.5 h-1.5 rounded-full bg-amber-500/25 shrink-0" />
+                    )}
+
+                    {/* Label (Left-aligned, never wider than 52vw, one line each, NO truncation) */}
+                    <span
+                      className={`font-display tracking-wide whitespace-nowrap overflow-visible ${
+                        isSelected
+                          ? "text-[20px] font-semibold text-amber-100"
+                          : "text-[15px] font-medium text-amber-400/50"
+                      }`}
+                      style={{
+                        textShadow: isSelected
+                          ? "0 0 14px rgba(212,162,76,0.6), 0 2px 10px rgba(0,0,0,0.95)"
+                          : "0 2px 8px rgba(0,0,0,0.9)",
+                      }}
+                    >
+                      {cardTitle}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
           </div>
+
+          {/* RIGHT SIDE MEDALLION: 64px gold-ringed circle with selected icon + 2-digit index */}
+          <div
+            data-debug="medallion"
+            className="absolute right-2 top-1/2 -translate-y-1/2 flex flex-col items-center justify-center pointer-events-none z-10"
+          >
+            <div className="relative w-16 h-16 rounded-full border-2 border-amber-400/60 bg-black/70 backdrop-blur-md shadow-[0_0_20px_rgba(212,162,76,0.35)] flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={selectedCard.id}
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.15 }}
+                  transition={{ duration: 0.22 }}
+                  className="flex items-center justify-center"
+                >
+                  {getMedallionIcon(selectedCard.iconName)}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Two-digit index ("01") in small gold font underneath medallion */}
+            <span className="font-mono text-[11px] font-bold text-amber-400 tracking-wider mt-1.5 drop-shadow">
+              {selectedCard.number}
+            </span>
+          </div>
+
+          {/* Swipe Hint at bottom-left of Zone B (fades away after first interaction) */}
+          <AnimatePresence>
+            {!hasInteracted && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute left-2 bottom-1 flex items-center gap-1 text-[10px] font-display text-amber-300/70 tracking-widest pointer-events-none animate-pulse"
+              >
+                <ChevronDown className="w-3 h-3 text-amber-400" />
+                <span>Swipe the disk</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Big tactile thumb-reach Open Button */}
-        <Link
-          href={selectedCard.href}
-          className="w-full max-w-xs h-11 rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 hover:from-amber-500 hover:to-amber-300 active:scale-95 text-black font-display text-xs sm:text-sm font-bold tracking-widest flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,162,76,0.45)] transition-all cursor-pointer"
-        >
-          <span>OPEN {(selectedCard.shortTitle || selectedCard.title).toUpperCase()}</span>
-          <ArrowRight className="w-4 h-4 stroke-[2.5]" />
-        </Link>
+        {/* FULL-WIDTH TACTILE OPEN BUTTON: 52px height, placed 16px above safe-area inset */}
+        {/* Name appears once in disk and once in button (no separate duplicate caption) */}
+        <div data-debug="button" className="w-full pb-4 pt-1 flex justify-center">
+          <Link
+            href={selectedCard.href}
+            className="w-full h-[52px] rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 hover:from-amber-500 hover:to-amber-300 active:scale-95 text-black font-display font-bold tracking-[0.12em] flex items-center justify-center gap-2 shadow-[0_0_22px_rgba(212,162,76,0.45)] transition-all cursor-pointer px-4"
+            style={{ fontSize: "clamp(11px, 3.3vw, 13px)" }}
+          >
+            <span className="truncate">
+              OPEN {(selectedCard.shortTitle || selectedCard.title).toUpperCase()}
+            </span>
+            <ArrowRight className="w-4 h-4 stroke-[2.5] shrink-0" />
+          </Link>
+        </div>
       </div>
     </div>
   )

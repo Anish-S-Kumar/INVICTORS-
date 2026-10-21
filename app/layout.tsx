@@ -22,10 +22,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  viewportFit: "cover",
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://invictors.vvce.ac.in"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://invictors.vvce.ac.in"),
+  manifest: "/manifest.webmanifest",
   title: "INVICTORS | Vidyavardhaka College of Engineering - Dept. of CSE",
   description: "Unravel the Clues. Hack the Rules. Build the Future. Official student club proposal by the Department of Computer Science & Engineering, Vidyavardhaka College of Engineering, Mysuru.",
   keywords: [

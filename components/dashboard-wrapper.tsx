@@ -3,10 +3,17 @@
 import React, { useState, useEffect } from "react"
 import Image from "next/image"
 import { WorksWheel } from "@/components/ui/works-wheel"
-import { WheelCarousel } from "@/components/ui/wheel-carousel"
+import { MobileRotaryDial } from "@/components/ui/mobile-rotary-dial"
 import { CLUB_METADATA } from "@/lib/content"
 
-export function DashboardWrapper() {
+import { CircuitSide } from "@/components/decor/CircuitSide"
+import { ForensicSide } from "@/components/decor/ForensicSide"
+
+interface DashboardWrapperProps {
+  isIntroPlaying?: boolean
+}
+
+export function DashboardWrapper({ isIntroPlaying = false }: DashboardWrapperProps) {
   const [mounted, setMounted] = useState(false)
   const [isDesktop, setIsDesktop] = useState(false)
 
@@ -32,6 +39,7 @@ export function DashboardWrapper() {
             alt="INVICTORS Emblem"
             fill
             priority
+            sizes="144px"
             className="object-cover"
           />
         </div>
@@ -43,8 +51,18 @@ export function DashboardWrapper() {
   }
 
   return (
-    <div className="relative w-full h-full">
-      {isDesktop ? <WorksWheel /> : <WheelCarousel />}
+    <div className="relative w-full h-full flex items-center justify-center">
+      {/* Subtle Animated Side Backgrounds (Masked, non-competing, paused during intro) */}
+      {!isIntroPlaying && (
+        <>
+          <CircuitSide isMobile={!isDesktop} />
+          <ForensicSide isMobile={!isDesktop} />
+        </>
+      )}
+
+      {/* Main Wheel Engine: WorksWheel for Desktop, MobileRotaryDial for Mobile */}
+      {isDesktop ? <WorksWheel /> : <MobileRotaryDial />}
     </div>
   )
 }
+

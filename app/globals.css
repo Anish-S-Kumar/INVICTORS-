@@ -246,3 +246,124 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #d4a24c;
 }
+
+/* Circuit & Forensic Side Decor Keyframes */
+@keyframes circuitPulse {
+  0% {
+    stroke-dashoffset: 400;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes binaryDrift {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-50%);
+  }
+}
+
+@keyframes scanlineSweep {
+  0%, 100% {
+    top: 5%;
+    opacity: 0.2;
+  }
+  50% {
+    top: 90%;
+    opacity: 0.9;
+  }
+}
+
+@keyframes reticleDrift {
+  0%, 100% {
+    transform: translate(0, 0);
+  }
+  33% {
+    transform: translate(8px, -10px);
+  }
+  66% {
+    transform: translate(-6px, 8px);
+  }
+}
+
+@keyframes orbitTravel {
+  0% {
+    transform: rotate(0deg);
+    transform-origin: 100px 50px;
+  }
+  100% {
+    transform: rotate(360deg);
+    transform-origin: 100px 50px;
+  }
+}
+
+@keyframes floatLeaf {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(10deg);
+  }
+}
+
+.animate-circuit-pulse-1 {
+  animation: circuitPulse 6s linear infinite;
+}
+
+.animate-circuit-pulse-2 {
+  animation: circuitPulse 8.5s linear infinite;
+}
+
+.animate-circuit-pulse-3 {
+  animation: circuitPulse 5s linear infinite;
+}
+
+.animate-binary-drift-1 {
+  animation: binaryDrift 16s linear infinite;
+}
+
+.animate-binary-drift-2 {
+  animation: binaryDrift 22s linear infinite;
+}
+
+.animate-scanline {
+  animation: scanlineSweep 4.5s ease-in-out infinite;
+}
+
+.animate-reticle-drift {
+  animation: reticleDrift 12s ease-in-out infinite;
+}
+
+.animate-orbit-travel {
+  animation: orbitTravel 14s linear infinite;
+}
+
+.animate-float-leaf {
+  animation: floatLeaf 6s ease-in-out infinite;
+}
+
+/* ========================================================================== */
+/* PERFORMANCE: Pause heavy background animations and blur while data-busy   */
+/* ========================================================================== */
+[data-busy="true"] .side-art,
+[data-busy="true"] .animate-spin-slow,
+[data-busy="true"] .animate-circuit-pulse-1,
+[data-busy="true"] .animate-circuit-pulse-2,
+[data-busy="true"] .animate-circuit-pulse-3,
+[data-busy="true"] .animate-binary-drift-1,
+[data-busy="true"] .animate-binary-drift-2,
+[data-busy="true"] .animate-scanline,
+[data-busy="true"] .animate-reticle-drift,
+[data-busy="true"] .animate-orbit-travel,
+[data-busy="true"] .animate-float-leaf,
+[data-busy="true"] .dust-particle {
+  animation-play-state: paused !important;
+}
+
+[data-busy="true"] .heavy-blur {
+  filter: none !important;
+  backdrop-filter: none !important;
+}

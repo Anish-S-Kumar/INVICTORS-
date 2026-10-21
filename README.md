@@ -136,6 +136,55 @@ npm run start
 
 ---
 
+## 📱 OPEN ON YOUR PHONE (Mobile & Local Network Testing)
+
+Follow these steps to access and test the website directly from an Android or iOS smartphone over your local Wi-Fi:
+
+### Step 1: Connect to the Same Wi-Fi
+Ensure your phone and computer are connected to the exact same Wi-Fi network. For testing:
+- Temporarily disable VPNs, mobile data (cellular), and custom Private DNS on your phone.
+
+### Step 2: Start the LAN Development Server
+Run the LAN-enabled dev script:
+```bash
+npm run dev:lan
+```
+The terminal will automatically detect your private IPv4 address (e.g. `http://192.168.1.7:3000`) and render an interactive ASCII QR code directly in the terminal!
+
+### Step 3: Open in Chrome Address Bar or Scan QR Code
+- Scan the printed QR code using your phone's camera app.
+- **OR** open Chrome on your phone, tap the **top URL / ADDRESS BAR** (not the in-page Google search widget), type `http://<your-lan-ip>:3000`, and tap Go.
+
+### Step 4: Troubleshooting Connection Timeouts
+If the page times out or fails to load on your phone:
+1. **Windows Firewall Rule**: Run PowerShell as Administrator and allow incoming connections on port 3000:
+   ```powershell
+   netsh advfirewall firewall add rule name="Next3000" dir=in action=allow protocol=TCP localport=3000
+   ```
+2. **Network Profile**: Ensure your Windows network connection is set to **Private Network** (not Public).
+3. **Router AP Isolation**: Ensure your Wi-Fi router does not have "AP Isolation", "Client Isolation", or "Guest Network" enabled, which blocks device-to-device communication.
+4. **macOS**: When prompted, allow incoming network connections for Node.js.
+
+### Step 5: High-Performance Production Preview on Mobile
+To test 60fps animations and smooth physics on mobile without dev-mode overhead:
+```bash
+npm run preview:lan
+```
+
+### Step 6: College Wi-Fi / Restricted Networks (Cloudflare Tunnel & ngrok)
+If you are on a university or campus network that strictly blocks device-to-device communication:
+```bash
+# Using Cloudflare Tunnel (Free, no account needed)
+npx cloudflared tunnel --url http://localhost:3000
+
+# OR using ngrok
+npx ngrok http 3000
+```
+Open the generated HTTPS URL on your phone!
+
+---
+
+
 ## 🖼️ Where to Drop / Replace Logo Assets
 
 If you wish to update or swap any of the official crests, replace the files directly inside `/public/assets/`:
