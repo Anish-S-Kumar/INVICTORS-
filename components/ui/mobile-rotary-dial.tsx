@@ -73,11 +73,11 @@ export function MobileRotaryDial() {
     }
   }, [])
 
-  // Calculate Dial Radius R: min(0.52 * width, 0.34 * height, 205)
-  // Under 640px height or landscape: shrink to 0.28 * height
+  // Calculate Dial Radius R: min(0.50 * width, 0.32 * height, 195)
+  // Under 640px height or landscape: shrink to 0.26 * height
   const isShortScreen = dimensions.height < 640 || dimensions.isLandscape
-  const maxHFactor = isShortScreen ? 0.28 : 0.34
-  const R = Math.round(Math.min(0.52 * dimensions.width, maxHFactor * dimensions.height, 205))
+  const maxHFactor = isShortScreen ? 0.26 : 0.32
+  const R = Math.round(Math.min(0.50 * dimensions.width, maxHFactor * dimensions.height, 195))
 
   // ---------------------------------------------------------------------------
   // MAIN PHYSICS LOOP (SmoothDamp snapping & continuous rotation)
@@ -413,13 +413,13 @@ export function MobileRotaryDial() {
             : "flex-1 min-h-0 w-full py-1"
         }`}
       >
-        {/* INVICTORS Logo Emblem */}
+        {/* INVICTORS Logo Emblem - Enlarged for crisp text readability inside symbol */}
         <div
           data-debug="logo"
-          className="relative rounded-full overflow-hidden shadow-[0_0_28px_rgba(212,162,76,0.35)] border-2 border-amber-500/50 shrink-0"
+          className="relative rounded-full overflow-hidden shadow-[0_0_32px_rgba(212,162,76,0.45)] border-2 border-amber-400/70 shrink-0"
           style={{
-            width: isShortScreen ? "clamp(75px, 22vw, 95px)" : "clamp(88px, 26vw, 130px)",
-            height: isShortScreen ? "clamp(75px, 22vw, 95px)" : "clamp(88px, 26vw, 130px)",
+            width: isShortScreen ? "clamp(105px, 32vw, 130px)" : "clamp(138px, 44vw, 182px)",
+            height: isShortScreen ? "clamp(105px, 32vw, 130px)" : "clamp(138px, 44vw, 182px)",
           }}
         >
           <Image
@@ -427,7 +427,7 @@ export function MobileRotaryDial() {
             alt="INVICTORS Emblem"
             fill
             priority
-            sizes="(max-width: 640px) 130px, 180px"
+            sizes="(max-width: 640px) 185px, 240px"
             className="object-cover"
           />
         </div>

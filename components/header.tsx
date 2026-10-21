@@ -47,7 +47,7 @@ export function Header({
   return (
     <header
       data-debug="header"
-      className="sticky top-0 z-40 w-full shrink-0 bg-gradient-to-b from-black/95 via-black/85 to-black/75 backdrop-blur-md transition-all duration-300 pt-[env(safe-area-inset-top,0px)] h-[66px] sm:h-[76px] lg:h-[90px]"
+      className="sticky top-0 z-40 w-full shrink-0 bg-gradient-to-b from-black/95 via-black/85 to-black/75 backdrop-blur-md transition-all duration-300 pt-[env(safe-area-inset-top,0px)] h-[74px] sm:h-[82px] lg:h-[94px]"
     >
       <div className="w-full h-full max-w-7xl mx-auto grid grid-cols-[auto_1fr_auto] gap-2.5 sm:gap-4 px-3 sm:px-4 lg:px-6 items-center">
         {/* Left: College Logo & Optional Back Button */}
@@ -69,7 +69,7 @@ export function Header({
             title="Vidyavardhaka College of Engineering"
             aria-label="Vidyavardhaka College of Engineering"
           >
-            <div className="relative w-[46px] h-[46px] sm:w-[56px] sm:h-[56px] lg:w-[74px] lg:h-[74px] rounded-xl sm:rounded-2xl overflow-hidden p-1 bg-white border-2 border-amber-400/60 shadow-[0_0_15px_rgba(212,162,76,0.35)] transition-all group-hover:scale-105 group-hover:border-amber-300 duration-300 flex items-center justify-center shrink-0">
+            <div className="relative w-[54px] h-[54px] sm:w-[62px] sm:h-[62px] lg:w-[78px] lg:h-[78px] rounded-xl sm:rounded-2xl overflow-hidden p-1 bg-white border-2 border-amber-400/60 shadow-[0_0_15px_rgba(212,162,76,0.35)] transition-all group-hover:scale-105 group-hover:border-amber-300 duration-300 flex items-center justify-center shrink-0">
               <Image
                 src="/assets/college-logo.jpg"
                 alt="Vidyavardhaka College of Engineering Logo"
@@ -93,20 +93,20 @@ export function Header({
             className="inline-block group focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/50 rounded max-w-full"
           >
             {/* Desktop single line (lg:block), Mobile two balanced lines (block lg:hidden) */}
-            <h1 className="font-display font-bold uppercase tracking-[0.06em] lg:tracking-[0.08em] bg-gradient-to-r from-[#e6c875] via-[#f7e7b4] to-[#cbd5e1] bg-clip-text text-transparent">
+            <h1 className="font-display font-extrabold uppercase tracking-[0.06em] lg:tracking-[0.08em] bg-gradient-to-r from-[#e6c875] via-[#f7e7b4] to-[#cbd5e1] bg-clip-text text-transparent">
               {/* Mobile version: Exactly two balanced lines */}
-              <span className="block lg:hidden leading-[1.12] text-[clamp(10.5px,4.1cqw,14.5px)]">
+              <span className="block lg:hidden leading-[1.14] text-[clamp(12px,4.4cqw,16px)]">
                 <span className="block">VIDYAVARDHAKA COLLEGE</span>
                 <span className="block">OF ENGINEERING</span>
               </span>
               {/* Desktop version: Single line */}
-              <span className="hidden lg:block text-[clamp(0.85rem,1.5vw,1.45rem)] leading-tight whitespace-nowrap">
+              <span className="hidden lg:block text-[clamp(0.92rem,1.6vw,1.5rem)] leading-tight whitespace-nowrap">
                 VIDYAVARDHAKA COLLEGE OF ENGINEERING
               </span>
             </h1>
 
             {/* Department subtitle: One single line, fitted and scaled to never clip */}
-            <p className="font-display font-normal text-slate-300 tracking-[0.09em] lg:tracking-[0.22em] uppercase mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis text-[clamp(6px,2.2cqw,8.2px)] lg:text-[clamp(0.52rem,0.95vw,0.82rem)]">
+            <p className="font-display font-semibold text-slate-200 tracking-[0.09em] lg:tracking-[0.22em] uppercase mt-0.5 sm:mt-1 whitespace-nowrap overflow-hidden text-ellipsis text-[clamp(7.5px,2.6cqw,9.8px)] lg:text-[clamp(0.58rem,1.05vw,0.88rem)]">
               {colWidth < 250
                 ? "DEPT. OF COMPUTER SCIENCE & ENGG."
                 : "DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING"}
@@ -122,7 +122,7 @@ export function Header({
             title="Department of Computer Science & Engineering"
             aria-label="Department of Computer Science and Engineering"
           >
-            <div className="relative w-[46px] h-[46px] sm:w-[56px] sm:h-[56px] lg:w-[74px] lg:h-[74px] rounded-xl sm:rounded-2xl overflow-hidden p-1 bg-white border-2 border-amber-400/60 shadow-[0_0_15px_rgba(212,162,76,0.35)] transition-all group-hover:scale-105 group-hover:border-amber-300 duration-300 flex items-center justify-center shrink-0">
+            <div className="relative w-[54px] h-[54px] sm:w-[62px] sm:h-[62px] lg:w-[78px] lg:h-[78px] rounded-xl sm:rounded-2xl overflow-hidden p-1 bg-white border-2 border-amber-400/60 shadow-[0_0_15px_rgba(212,162,76,0.35)] transition-all group-hover:scale-105 group-hover:border-amber-300 duration-300 flex items-center justify-center shrink-0">
               <Image
                 src="/assets/cse-logo.jpg"
                 alt="Department of Computer Science & Engineering Logo"
