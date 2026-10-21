@@ -18,6 +18,16 @@ export default function HomePage() {
     document.documentElement.style.overflow = "hidden"
     document.body.style.overflow = "hidden"
 
+    // Bind dynamic --app-h from visualViewport to prevent dynamic Chrome toolbar resize issues
+    const setAppH = () => {
+      const h = window.visualViewport?.height ?? window.innerHeight
+      document.documentElement.style.setProperty("--app-h", `${h}px`)
+    }
+    setAppH()
+    window.visualViewport?.addEventListener("resize", setAppH)
+    window.addEventListener("resize", setAppH)
+    window.addEventListener("orientationchange", setAppH)
+
     try {
       if (sessionStorage.getItem("invictors_intro_seen") === "true") {
         setIntroFinished(true)
@@ -29,11 +39,18 @@ export default function HomePage() {
     return () => {
       document.documentElement.style.overflow = originalHtmlOverflow
       document.body.style.overflow = originalBodyOverflow
+      window.visualViewport?.removeEventListener("resize", setAppH)
+      window.removeEventListener("resize", setAppH)
+      window.removeEventListener("orientationchange", setAppH)
     }
   }, [])
 
   return (
-    <div id="main-content" className="relative h-[100dvh] w-full flex flex-col overflow-hidden select-none bg-[#050505]">
+    <div
+      id="main-content"
+      className="relative w-full flex flex-col overflow-hidden select-none bg-[#050505]"
+      style={{ height: "var(--app-h, 100dvh)" }}
+    >
       {/* Dev-only alignment & concentricity debug overlay (?debug=1) */}
       <DebugOverlay />
 

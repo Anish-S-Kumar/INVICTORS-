@@ -3,6 +3,7 @@ export interface NavigationCard {
   number: string
   title: string
   shortTitle?: string
+  dialLabel?: string
   subtitle: string
   href: string
   iconName: string
@@ -76,6 +77,8 @@ export const NAVIGATION_CARDS: NavigationCard[] = [
     id: "overview",
     number: "01",
     title: "Club Overview",
+    shortTitle: "Overview",
+    dialLabel: "Overview",
     subtitle: "Vision & Philosophy",
     href: "/overview",
     iconName: "Compass",
@@ -87,6 +90,8 @@ export const NAVIGATION_CARDS: NavigationCard[] = [
     id: "mission",
     number: "02",
     title: "Mission Statement",
+    shortTitle: "Mission",
+    dialLabel: "Mission",
     subtitle: "Core Mandate",
     href: "/mission",
     iconName: "Target",
@@ -99,6 +104,7 @@ export const NAVIGATION_CARDS: NavigationCard[] = [
     number: "03",
     title: "Why INVICTORS Is Unique & Distinct",
     shortTitle: "Why INVICTORS",
+    dialLabel: "Why INVICTORS",
     subtitle: "The Paradigm Shift",
     href: "/unique",
     iconName: "Sparkles",
@@ -110,6 +116,8 @@ export const NAVIGATION_CARDS: NavigationCard[] = [
     id: "pillars",
     number: "04",
     title: "Core Club Pillars",
+    shortTitle: "Pillars",
+    dialLabel: "Pillars",
     subtitle: "Architectural Focus",
     href: "/pillars",
     iconName: "Layers",
@@ -121,6 +129,8 @@ export const NAVIGATION_CARDS: NavigationCard[] = [
     id: "events",
     number: "05",
     title: "Upcoming Events",
+    shortTitle: "Events",
+    dialLabel: "Events",
     subtitle: "Action & Competitions",
     href: "/events",
     iconName: "CalendarDays",
@@ -132,6 +142,8 @@ export const NAVIGATION_CARDS: NavigationCard[] = [
     id: "rank",
     number: "06",
     title: "Rank",
+    shortTitle: "Rank",
+    dialLabel: "Rank",
     subtitle: "Honor & Leaderboard",
     href: "/rank",
     iconName: "Trophy",

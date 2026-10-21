@@ -123,9 +123,135 @@ export function DebugOverlay() {
       }
 
       // Check mobile zones
-      checkPair("zone-a", "zone-b")
-      checkPair("disk", "logo")
-      checkPair("button", "disk")
+      checkPair("zone-a", "zone-b1")
+      checkPair("button", "zone-b1")
+
+      // =====================================================================
+      // V7 MOBILE ROTARY DIAL DEV ASSERTIONS
+      // =====================================================================
+      const dialLabels = Array.from(document.querySelectorAll<HTMLElement>("[data-dial-label]"))
+      if (dialLabels.length > 0) {
+        // Assertion 1: Exactly 6 elements match [data-dial-label]
+        if (dialLabels.length !== 6) {
+          const warnMsg = `[V7 Assertion Failed] Exactly 6 elements must match [data-dial-label], found ${dialLabels.length}`
+          newWarnings.push(warnMsg)
+          console.warn(warnMsg)
+        }
+
+        const zoneB1El = document.querySelector<HTMLElement>("[data-debug='zone-b1']")
+        const b1Rect = zoneB1El?.getBoundingClientRect()
+
+        // Assertion 2: Selected label non-empty and inside viewport and Zone B1
+        const selectedLabel = dialLabels.find((el) => el.getAttribute("data-selected") === "true")
+        if (!selectedLabel) {
+          const warnMsg = `[V7 Assertion Failed] No label has data-selected="true"`
+          newWarnings.push(warnMsg)
+          console.warn(warnMsg)
+        } else {
+          const selText = selectedLabel.textContent?.trim() || ""
+          if (selText.length === 0) {
+            const warnMsg = `[V7 Assertion Failed] Selected label text is empty`
+            newWarnings.push(warnMsg)
+            console.warn(warnMsg)
+          }
+          const selRect = selectedLabel.getBoundingClientRect()
+          const inViewport =
+            selRect.left >= 0 &&
+            selRect.right <= window.innerWidth &&
+            selRect.top >= 0 &&
+            selRect.bottom <= window.innerHeight
+          if (!inViewport) {
+            const warnMsg = `[V7 Assertion Failed] Selected label lies outside viewport: [${Math.round(selRect.left)}, ${Math.round(selRect.right)}]`
+            newWarnings.push(warnMsg)
+            console.warn(warnMsg, selRect)
+          }
+          if (b1Rect) {
+            // Allow 2px subpixel rounding tolerance
+            const inB1 =
+              selRect.left >= b1Rect.left - 2 &&
+              selRect.right <= b1Rect.right + 2 &&
+              selRect.top >= b1Rect.top - 2 &&
+              selRect.bottom <= b1Rect.bottom + 2
+            if (!inB1) {
+              const warnMsg = `[V7 Assertion Failed] Selected label lies outside Zone B1`
+              newWarnings.push(warnMsg)
+              console.warn(warnMsg, selRect, b1Rect)
+            }
+          }
+        }
+
+        // Assertion 3: Both neighbours' bounding boxes are inside the viewport
+        const visibleNeighbours = dialLabels.filter(
+          (el) =>
+            el.style.visibility !== "hidden" &&
+            parseFloat(el.style.opacity || "1") > 0.1 &&
+            el !== selectedLabel
+        )
+        visibleNeighbours.forEach((nb, i) => {
+          const nbRect = nb.getBoundingClientRect()
+          // Allow subpixel leeway of 3px
+          const inVp = nbRect.left >= -3 && nbRect.right <= window.innerWidth + 3
+          if (!inVp) {
+            const warnMsg = `[V7 Assertion Failed] Neighbour label ${i + 1} (${nb.textContent?.trim().slice(0, 15)}) outside viewport: left=${Math.round(nbRect.left)}, right=${Math.round(nbRect.right)}`
+            newWarnings.push(warnMsg)
+            console.warn(warnMsg, nbRect)
+          }
+        })
+
+        // Assertion 4: Pill bounding box inside viewport with bottom >= 28px above window.innerHeight
+        const pillBtn = document.querySelector<HTMLElement>("[data-debug='button']")
+        if (pillBtn) {
+          const pillRect = pillBtn.getBoundingClientRect()
+          const clearance = window.innerHeight - pillRect.bottom
+          if (clearance < 27.5) {
+            const warnMsg = `[V7 Assertion Failed] Pill bottom clearance (${clearance.toFixed(1)}px) is under 28px above window.innerHeight`
+            newWarnings.push(warnMsg)
+            console.warn(warnMsg, clearance)
+          }
+          if (pillRect.left < 0 || pillRect.right > window.innerWidth || pillRect.top < 0 || pillRect.bottom > window.innerHeight) {
+            const warnMsg = `[V7 Assertion Failed] Pill is not entirely inside viewport`
+            newWarnings.push(warnMsg)
+            console.warn(warnMsg, pillRect)
+          }
+
+          // Assertion 6: Pill does not intersect dial area (Zone B1)
+          if (b1Rect) {
+            const pillIntersectsB1 = !(
+              pillRect.right <= b1Rect.left ||
+              pillRect.left >= b1Rect.right ||
+              pillRect.bottom <= b1Rect.top ||
+              pillRect.top >= b1Rect.bottom
+            )
+            if (pillIntersectsB1) {
+              const warnMsg = `[V7 Assertion Failed] Pill intersects Zone B1 dial area`
+              newWarnings.push(warnMsg)
+              console.warn(warnMsg, pillRect, b1Rect)
+            }
+          }
+        }
+
+        // Assertion 5: No two labels' visible boxes overlap
+        const visibleLabels = dialLabels.filter(
+          (el) => el.style.visibility !== "hidden" && parseFloat(el.style.opacity || "1") > 0.3
+        )
+        for (let i = 0; i < visibleLabels.length; i++) {
+          for (let j = i + 1; j < visibleLabels.length; j++) {
+            const r1 = visibleLabels[i].getBoundingClientRect()
+            const r2 = visibleLabels[j].getBoundingClientRect()
+            const overlap = !(
+              r1.right <= r2.left ||
+              r1.left >= r2.right ||
+              r1.bottom <= r2.top ||
+              r1.top >= r2.bottom
+            )
+            if (overlap) {
+              const warnMsg = `[V7 Assertion Failed] Dial labels overlap: "${visibleLabels[i].textContent?.trim().slice(0, 10)}" and "${visibleLabels[j].textContent?.trim().slice(0, 10)}"`
+              newWarnings.push(warnMsg)
+              console.warn(warnMsg, r1, r2)
+            }
+          }
+        }
+      }
 
       setBoxes(foundBoxes)
       setWarnings(newWarnings)
