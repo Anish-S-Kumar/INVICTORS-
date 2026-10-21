@@ -201,8 +201,8 @@ export function WheelCarousel({
           data-debug="logo"
           className="relative flex items-center justify-center shrink-0"
           style={{
-            width: isSmallHeight ? "min(34vw, 105px)" : "min(38vw, 19vh, 135px)",
-            height: isSmallHeight ? "min(34vw, 105px)" : "min(38vw, 19vh, 135px)",
+            width: isSmallHeight ? "min(38vw, 130px)" : "min(50vw, 24vh, 205px)",
+            height: isSmallHeight ? "min(38vw, 130px)" : "min(50vw, 24vh, 205px)",
           }}
         >
           {/* Masked Breathing Glow so it never bleeds into Header or Zone B */}
