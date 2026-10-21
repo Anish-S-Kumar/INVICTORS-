@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect } from "react"
 import { Header } from "@/components/header"
-import { IntroAnimation } from "@/components/intro-animation"
+import { IntroVideo } from "@/components/intro-video"
 import { DashboardWrapper } from "@/components/dashboard-wrapper"
 import { CLUB_METADATA } from "@/lib/content"
+
+import { DebugOverlay } from "@/components/debug-overlay"
 
 export default function HomePage() {
   const [introFinished, setIntroFinished] = useState<boolean>(false)
@@ -32,20 +34,29 @@ export default function HomePage() {
 
   return (
     <div id="main-content" className="relative h-[100dvh] w-full flex flex-col overflow-hidden select-none bg-[#050505]">
-      {/* Cinematic Intro Animation Overlay */}
+      {/* Dev-only alignment & concentricity debug overlay (?debug=1) */}
+      <DebugOverlay />
+
+      {/* Cinematic Intro Video Overlay */}
       {!introFinished && (
-        <IntroAnimation onComplete={() => setIntroFinished(true)} />
+        <IntroVideo onComplete={() => setIntroFinished(true)} />
       )}
 
-      {/* Row 1: Slim Header */}
-      <Header />
+      {/* Row 1: Slim Header (64px mobile, 72px laptop) - fades in when intro ends */}
+      <div className={`transition-opacity duration-700 ease-out ${introFinished ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+        <Header />
+      </div>
 
-      {/* Row 2: Dashboard Stage (flex-1 min-h-0 fits remaining viewport height) */}
-      <main className="flex-1 min-h-0 relative w-full flex flex-col items-center justify-center overflow-hidden">
-        <DashboardWrapper />
+      {/* Row 2: Dashboard Stage - mounted underneath for zero jank, fades in over 600ms */}
+      <main
+        className={`flex-1 min-h-0 relative w-full flex flex-col items-center justify-center overflow-hidden transition-opacity duration-700 ease-out ${
+          introFinished ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <DashboardWrapper isIntroPlaying={!introFinished} />
 
-        {/* Row 3: One-line footer overlaid inside the stage so it adds no extra height */}
-        <div className="absolute bottom-1 inset-x-0 z-20 pointer-events-none flex items-center justify-center px-4">
+        {/* Row 3: One-line footer overlaid on laptop ONLY (hidden on mobile to clear gesture bar) */}
+        <div className="hidden lg:flex absolute bottom-1 inset-x-0 z-20 pointer-events-none items-center justify-center px-4">
           <p className="text-[10px] sm:text-xs text-silver-300/50 font-body tracking-wider text-center drop-shadow">
             {CLUB_METADATA.footerText}
           </p>
@@ -54,3 +65,4 @@ export default function HomePage() {
     </div>
   )
 }
+

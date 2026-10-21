@@ -1,0 +1,23 @@
+{
+  "name": "INVICTORS Club — Dept. of CSE, VVCE",
+  "short_name": "INVICTORS",
+  "description": "Decode. Innovate. Overcome. Unravel the Clues. Hack the Rules. Build the Future.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/invictors-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

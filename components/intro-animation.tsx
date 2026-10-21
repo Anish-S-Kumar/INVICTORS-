@@ -70,12 +70,18 @@ export function IntroAnimation({ onComplete }: IntroAnimationProps) {
     // 3.4s - 4.6s Logo glides to dashboard, backdrop dissolves
     const t5 = setTimeout(() => setStage(5), 3600)
 
+    // Hard 7.0s safety timeout to guarantee the user is never trapped
+    const hardTimeout = setTimeout(() => {
+      finishIntro()
+    }, 7000)
+
     // Finish handover at ~4.8s
     const tEnd = setTimeout(() => {
       finishIntro()
     }, 4800)
 
     return () => {
+      clearTimeout(hardTimeout)
       clearTimeout(skipTimer)
       clearTimeout(t2)
       clearTimeout(t3)
@@ -243,6 +249,7 @@ export function IntroAnimation({ onComplete }: IntroAnimationProps) {
                 alt="INVICTORS Emblem"
                 fill
                 priority
+                sizes="(max-width: 640px) 192px, 240px"
                 className="object-cover"
               />
 
