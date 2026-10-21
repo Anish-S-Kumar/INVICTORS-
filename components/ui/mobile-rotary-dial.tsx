@@ -73,11 +73,11 @@ export function MobileRotaryDial() {
     }
   }, [])
 
-  // Calculate Dial Radius R: min(0.60 * width, 0.40 * height)
-  // Under 640px height or landscape: shrink to 0.34 * height
+  // Calculate Dial Radius R: min(0.52 * width, 0.34 * height, 205)
+  // Under 640px height or landscape: shrink to 0.28 * height
   const isShortScreen = dimensions.height < 640 || dimensions.isLandscape
-  const maxHFactor = isShortScreen ? 0.34 : 0.40
-  const R = Math.round(Math.min(0.60 * dimensions.width, maxHFactor * dimensions.height))
+  const maxHFactor = isShortScreen ? 0.28 : 0.34
+  const R = Math.round(Math.min(0.52 * dimensions.width, maxHFactor * dimensions.height, 205))
 
   // ---------------------------------------------------------------------------
   // MAIN PHYSICS LOOP (SmoothDamp snapping & continuous rotation)
@@ -392,11 +392,11 @@ export function MobileRotaryDial() {
       tabIndex={0}
       onKeyDown={handleKeyDown}
       className={`relative w-full h-full flex select-none overflow-hidden outline-none ${
-        dimensions.isLandscape ? "flex-row" : "flex-col"
+        dimensions.isLandscape ? "flex-row" : "flex-col justify-between"
       }`}
       style={{
-        height: "100dvh",
-        maxHeight: "100vh",
+        height: "100%",
+        maxHeight: "100%",
       }}
     >
       {/* Screen Reader Live Announcement */}
@@ -412,16 +412,16 @@ export function MobileRotaryDial() {
         className={`flex flex-col items-center justify-center px-4 z-10 transition-all ${
           dimensions.isLandscape
             ? "w-1/2 h-full justify-center"
-            : "flex-1 min-h-0 w-full"
+            : "flex-1 min-h-0 w-full py-1"
         }`}
       >
         {/* INVICTORS Logo Emblem */}
         <div
           data-debug="logo"
-          className="relative rounded-full overflow-hidden shadow-[0_0_35px_rgba(212,162,76,0.35)] border-2 border-amber-500/50"
+          className="relative rounded-full overflow-hidden shadow-[0_0_28px_rgba(212,162,76,0.35)] border-2 border-amber-500/50 shrink-0"
           style={{
-            width: isShortScreen ? "clamp(90px, 32vw, 130px)" : "clamp(120px, 50vw, 190px)",
-            height: isShortScreen ? "clamp(90px, 32vw, 130px)" : "clamp(120px, 50vw, 190px)",
+            width: isShortScreen ? "clamp(75px, 22vw, 95px)" : "clamp(88px, 26vw, 130px)",
+            height: isShortScreen ? "clamp(75px, 22vw, 95px)" : "clamp(88px, 26vw, 130px)",
           }}
         >
           <Image
@@ -429,27 +429,27 @@ export function MobileRotaryDial() {
             alt="INVICTORS Emblem"
             fill
             priority
-            sizes="(max-width: 640px) 190px, 240px"
+            sizes="(max-width: 640px) 130px, 180px"
             className="object-cover"
           />
         </div>
 
         {/* MOTTO: ONE Line in Gold */}
-        <div data-debug="motto" className="mt-3 text-center">
+        <div data-debug="motto" className="mt-2 text-center shrink-0">
           <span
-            className="font-display font-bold text-gradient-gold uppercase tracking-[0.22em] drop-shadow-[0_0_8px_rgba(212,162,76,0.4)]"
-            style={{ fontSize: isShortScreen ? "11px" : "clamp(12px, 3.2vw, 14.5px)" }}
+            className="font-display font-bold text-gradient-gold uppercase tracking-[0.2em] drop-shadow-[0_0_8px_rgba(212,162,76,0.4)]"
+            style={{ fontSize: isShortScreen ? "10px" : "clamp(11px, 2.9vw, 13px)" }}
           >
             {CLUB_METADATA.motto}
           </span>
         </div>
 
         {/* SLOGAN: Exactly TWO balanced lines in Silver-100 */}
-        <div data-debug="slogan" className="mt-1 text-center font-display font-medium text-silver-100 flex flex-col leading-tight">
-          <span style={{ fontSize: isShortScreen ? "11px" : "clamp(11.5px, 3.1vw, 14px)", letterSpacing: "0.03em" }}>
+        <div data-debug="slogan" className="mt-0.5 text-center font-display font-medium text-silver-100 flex flex-col leading-tight shrink-0">
+          <span style={{ fontSize: isShortScreen ? "10px" : "clamp(10.5px, 2.8vw, 12.5px)", letterSpacing: "0.02em" }}>
             Unravel the Clues. Hack the Rules.
           </span>
-          <span style={{ fontSize: isShortScreen ? "11px" : "clamp(11.5px, 3.1vw, 14px)", letterSpacing: "0.03em" }} className="text-silver-300">
+          <span style={{ fontSize: isShortScreen ? "10px" : "clamp(10.5px, 2.8vw, 12.5px)", letterSpacing: "0.02em" }} className="text-silver-300">
             Build the Future.
           </span>
         </div>
@@ -465,12 +465,12 @@ export function MobileRotaryDial() {
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
-        className={`relative z-20 flex flex-col items-center justify-end overflow-visible touch-none cursor-grab active:cursor-grabbing ${
+        className={`relative z-20 flex flex-col items-center justify-end overflow-visible touch-none cursor-grab active:cursor-grabbing shrink-0 ${
           dimensions.isLandscape ? "w-1/2 h-full" : "w-full"
         }`}
         style={{
-          height: `${R + 24}px`,
-          paddingBottom: "env(safe-area-inset-bottom, 0px)",
+          height: `${R + 12}px`,
+          paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)",
         }}
       >
         {/* Mute / Unmute Toggle Button (Top-Right of Zone B, above rim) */}
@@ -675,20 +675,20 @@ export function MobileRotaryDial() {
         <div
           className="absolute z-20 flex flex-col items-center justify-between pointer-events-none"
           style={{
-            bottom: "16px",
+            bottom: "max(env(safe-area-inset-bottom, 0px), 10px)",
             left: "50%",
             transform: "translateX(-50%)",
-            width: "min(88vw, 320px)",
+            width: "min(88vw, 290px)",
             height: `${R * 0.58}px`,
           }}
         >
-          {/* 56px Gold-ringed Medallion with crossfading icon */}
+          {/* 48px-52px Gold-ringed Medallion with crossfading icon */}
           <div
             data-debug="medallion"
-            className="w-14 h-14 rounded-full border-2 border-amber-400/80 bg-gradient-to-b from-amber-950/80 to-black flex items-center justify-center text-amber-300 shadow-[0_0_20px_rgba(212,162,76,0.45)] transition-transform duration-300 pointer-events-auto"
+            className="w-12 h-12 rounded-full border-2 border-amber-400/80 bg-gradient-to-b from-amber-950/80 to-black flex items-center justify-center text-amber-300 shadow-[0_0_15px_rgba(212,162,76,0.45)] transition-transform duration-300 pointer-events-auto"
             onClick={handleOpenPage}
           >
-            <svg width="26" height="26" viewBox="0 0 24 24" className="transition-all duration-300">
+            <svg width="22" height="22" viewBox="0 0 24 24" className="transition-all duration-300">
               {renderIcon(selectedItem.iconName)}
             </svg>
           </div>
@@ -697,10 +697,10 @@ export function MobileRotaryDial() {
           <button
             data-debug="button"
             onClick={handleOpenPage}
-            className="w-full max-w-[280px] h-12 px-4 rounded-full border border-amber-400 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 text-black font-display font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(212,162,76,0.5)] transition-all duration-200 active:scale-95 pointer-events-auto cursor-pointer"
+            className="w-full max-w-[270px] h-10 sm:h-11 px-4 rounded-full border border-amber-400 bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 text-black font-display font-bold text-xs tracking-wider flex items-center justify-center gap-2 shadow-[0_0_18px_rgba(212,162,76,0.5)] transition-all duration-200 active:scale-95 pointer-events-auto cursor-pointer"
           >
             <span className="truncate">OPEN {selectedItem.title.toUpperCase()}</span>
-            <ArrowRight className="w-4 h-4 stroke-[2.5] shrink-0" />
+            <ArrowRight className="w-3.5 h-3.5 stroke-[2.5] shrink-0" />
           </button>
         </div>
       </div>

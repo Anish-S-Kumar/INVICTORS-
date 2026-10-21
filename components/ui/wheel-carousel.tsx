@@ -199,10 +199,10 @@ export function WheelCarousel({
         {/* Logo Emblem: Diameter = min(54vw, 0.62 * zoneA height) */}
         <div
           data-debug="logo"
-          className="relative flex items-center justify-center"
+          className="relative flex items-center justify-center shrink-0"
           style={{
-            width: isSmallHeight ? "min(36vw, 120px)" : "min(50vw, 23vh, 175px)",
-            height: isSmallHeight ? "min(36vw, 120px)" : "min(50vw, 23vh, 175px)",
+            width: isSmallHeight ? "min(34vw, 105px)" : "min(38vw, 19vh, 135px)",
+            height: isSmallHeight ? "min(34vw, 105px)" : "min(38vw, 19vh, 135px)",
           }}
         >
           {/* Masked Breathing Glow so it never bleeds into Header or Zone B */}
@@ -396,7 +396,7 @@ export function WheelCarousel({
 
         {/* FULL-WIDTH TACTILE OPEN BUTTON: 52px height, placed 16px above safe-area inset */}
         {/* Name appears once in disk and once in button (no separate duplicate caption) */}
-        <div data-debug="button" className="w-full pb-4 pt-1 flex justify-center">
+        <div data-debug="button" className="w-full pb-[max(env(safe-area-inset-bottom,0px),12px)] pt-1 flex justify-center">
           <Link
             href={selectedCard.href}
             className="w-full h-[52px] rounded-full bg-gradient-to-r from-amber-600 via-amber-500 to-amber-400 hover:from-amber-500 hover:to-amber-300 active:scale-95 text-black font-display font-bold tracking-[0.12em] flex items-center justify-center gap-2 shadow-[0_0_22px_rgba(212,162,76,0.45)] transition-all cursor-pointer px-4"
