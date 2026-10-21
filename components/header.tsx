@@ -47,9 +47,9 @@ export function Header({
   return (
     <header
       data-debug="header"
-      className="sticky top-0 z-40 w-full shrink-0 bg-gradient-to-b from-black/95 via-black/85 to-black/75 backdrop-blur-md transition-all duration-300 pt-[env(safe-area-inset-top,0px)] h-[64px] lg:h-[72px]"
+      className="sticky top-0 z-40 w-full shrink-0 bg-gradient-to-b from-black/95 via-black/85 to-black/75 backdrop-blur-md transition-all duration-300 pt-[env(safe-area-inset-top,0px)] h-[72px] sm:h-[80px] lg:h-[92px]"
     >
-      <div className="w-full h-full max-w-7xl mx-auto grid grid-cols-[40px_1fr_40px] lg:grid-cols-[52px_1fr_52px] gap-3 lg:gap-4 px-4 lg:px-6 items-center">
+      <div className="w-full h-full max-w-7xl mx-auto grid grid-cols-[auto_1fr_auto] gap-2.5 sm:gap-4 px-3 sm:px-4 lg:px-6 items-center">
         {/* Left: College Logo & Optional Back Button */}
         <div className="flex items-center gap-2 justify-self-start">
           {showBack && (
@@ -69,12 +69,12 @@ export function Header({
             title="Vidyavardhaka College of Engineering"
             aria-label="Vidyavardhaka College of Engineering"
           >
-            <div className="relative w-[40px] h-[40px] lg:w-[52px] lg:h-[52px] rounded-full overflow-hidden p-1 bg-black/60 border border-amber-400/40 shadow-[0_0_12px_rgba(212,162,76,0.25)] transition-transform group-hover:scale-105 duration-300 flex items-center justify-center shrink-0">
+            <div className="relative w-[50px] h-[50px] sm:w-[58px] sm:h-[58px] lg:w-[74px] lg:h-[74px] rounded-xl sm:rounded-2xl overflow-hidden p-1 bg-white border-2 border-amber-400/60 shadow-[0_0_15px_rgba(212,162,76,0.35)] transition-all group-hover:scale-105 group-hover:border-amber-300 duration-300 flex items-center justify-center shrink-0">
               <Image
-                src="/assets/college-logo.png"
+                src="/assets/college-logo.jpg"
                 alt="Vidyavardhaka College of Engineering Logo"
-                width={52}
-                height={52}
+                width={80}
+                height={80}
                 priority
                 className="object-contain w-full h-full"
               />
@@ -122,12 +122,12 @@ export function Header({
             title="Department of Computer Science & Engineering"
             aria-label="Department of Computer Science and Engineering"
           >
-            <div className="relative w-[40px] h-[40px] lg:w-[52px] lg:h-[52px] rounded-full overflow-hidden p-1 bg-black/60 border border-amber-400/40 shadow-[0_0_12px_rgba(212,162,76,0.25)] transition-transform group-hover:scale-105 duration-300 flex items-center justify-center shrink-0">
+            <div className="relative w-[50px] h-[50px] sm:w-[58px] sm:h-[58px] lg:w-[74px] lg:h-[74px] rounded-xl sm:rounded-2xl overflow-hidden p-1 bg-white border-2 border-amber-400/60 shadow-[0_0_15px_rgba(212,162,76,0.35)] transition-all group-hover:scale-105 group-hover:border-amber-300 duration-300 flex items-center justify-center shrink-0">
               <Image
-                src="/assets/cse-logo.png"
+                src="/assets/cse-logo.jpg"
                 alt="Department of Computer Science & Engineering Logo"
-                width={52}
-                height={52}
+                width={80}
+                height={80}
                 priority
                 className="object-contain w-full h-full"
               />
