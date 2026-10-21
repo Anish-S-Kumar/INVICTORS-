@@ -139,30 +139,23 @@ export function MobileRotaryDial() {
         labelsGroupRef.current.setAttribute("transform", `rotate(${curAngle.toFixed(2)} 500 500)`)
       }
 
-      // Update per-label opacity and scale directly by ref
+      // Update per-label opacity ONLY (DO NOT touch style.transform, which destroys SVG rotate!)
       labelGroupRefs.current.forEach((el, idx) => {
         if (!el) return
         const angleRel = (((idx * 60 + curAngle) % 360) + 540) % 360 - 180
         const absAngle = Math.abs(angleRel)
 
-        if (absAngle <= 30) {
-          // Selected label at 12 o'clock notch: prominent gold, full opacity
-          const factor = 1 - (absAngle / 30) * 0.12
-          const scale = 1 - (absAngle / 30) * 0.10
-          el.style.opacity = factor.toFixed(2)
-          el.style.transform = `scale(${scale.toFixed(2)})`
-        } else if (absAngle <= 95) {
-          // Adjacent options at respective dial tick marks: clearly visible with solid opacity
-          const factor = 0.85 - ((absAngle - 30) / 65) * 0.15
-          el.style.opacity = factor.toFixed(2)
-          el.style.transform = "scale(0.84)"
-        } else if (absAngle <= 135) {
-          // Lower visible marks along the dial rim: still clearly legible
-          const factor = Math.max(0, 0.70 - ((absAngle - 95) / 40) * 0.35)
-          el.style.opacity = factor.toFixed(2)
-          el.style.transform = "scale(0.76)"
+        if (absAngle <= 35) {
+          // Selected label at 12 o'clock notch: full 100% opacity
+          el.style.opacity = "1"
+        } else if (absAngle <= 100) {
+          // Visible adjacent options on the dial face: clearly visible at 85% opacity
+          el.style.opacity = "0.85"
+        } else if (absAngle <= 145) {
+          // Lower visible marks along the dial rim: 65% opacity
+          el.style.opacity = "0.65"
         } else {
-          // Hidden below bottom horizon
+          // Hidden below horizon
           el.style.opacity = "0"
         }
       })
@@ -490,7 +483,7 @@ export function MobileRotaryDial() {
 
         {/* "Turn the dial" Curved Hint above rim (Fades after first interaction) */}
         {!hasInteracted && (
-          <div className="absolute top-1 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/30 bg-black/85 text-amber-300/90 text-[10.5px] font-display tracking-widest backdrop-blur-md animate-bounce shadow-md">
+          <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/30 bg-black/85 text-amber-300/90 text-[10.5px] font-display tracking-widest backdrop-blur-md animate-bounce shadow-md">
             <span>Turn the dial</span>
             <CornerRightDown className="w-3 h-3 text-amber-400" />
           </div>
@@ -500,13 +493,11 @@ export function MobileRotaryDial() {
         <div
           className="absolute z-30 pointer-events-none flex flex-col items-center"
           style={{
-            top: "8px",
+            top: "2px",
             left: "50%",
             transform: "translateX(-50%)",
           }}
         >
-          {/* Thin vertical hairline */}
-          <div className="w-[1px] h-3 bg-gradient-to-b from-transparent via-amber-300 to-amber-400 shadow-[0_0_6px_#f1d58a]" />
           {/* Triangular notch */}
           <div
             className="w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[7px] border-t-amber-400 drop-shadow-[0_0_6px_rgba(212,162,76,0.8)]"
@@ -626,10 +617,6 @@ export function MobileRotaryDial() {
                       labelGroupRefs.current[idx] = el
                     }}
                     transform={`rotate(${itemAngle} 500 500)`}
-                    style={{
-                      transformOrigin: "500px 105px",
-                      transition: "opacity 0.15s ease",
-                    }}
                     role="option"
                     aria-selected={selectedIndex === idx}
                     onClick={() => {
@@ -641,28 +628,34 @@ export function MobileRotaryDial() {
                     }}
                     className="cursor-pointer"
                   >
-                    {/* Index "01"-"06" above title at radius 416 */}
+                    {/* Index "01"-"06" directly below inside of the dial stick at radius 412 */}
                     <text
                       x="500"
-                      y={500 - 416}
+                      y={500 - 410}
                       textAnchor="middle"
                       fill="#f1d58a"
-                      className="font-mono text-[13px] font-bold tracking-widest uppercase select-none drop-shadow"
+                      className="font-mono font-bold tracking-widest uppercase select-none"
+                      style={{
+                        fontSize: "26px",
+                      }}
                     >
                       {item.number}
                     </text>
 
-                    {/* Full Dashboard Name Centred along tangent at radius 388 below inside dial stick */}
+                    {/* Full Dashboard Name Centred along tangent at radius 365 below inside dial stick */}
                     <text
                       x="500"
-                      y={500 - 388}
+                      y={500 - 365}
                       textAnchor="middle"
                       fill="#fff3c4"
-                      className="font-display font-semibold select-none transition-colors"
+                      className="font-display font-bold select-none transition-colors"
                       style={{
-                        fontSize: "19px",
-                        letterSpacing: "0.05em",
-                        textShadow: "0 2px 10px rgba(0,0,0,0.95), 0 0 12px rgba(212,162,76,0.4)",
+                        fontSize: "34px",
+                        letterSpacing: "0.03em",
+                        paintOrder: "stroke fill",
+                        stroke: "#08080a",
+                        strokeWidth: "6px",
+                        strokeLinejoin: "round",
                       }}
                     >
                       {item.title}
