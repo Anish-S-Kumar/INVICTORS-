@@ -146,18 +146,23 @@ export function MobileRotaryDial() {
         const absAngle = Math.abs(angleRel)
 
         if (absAngle <= 30) {
-          // Selected label at 12 o'clock: 20px, gold-100, 100% opacity
-          const factor = 1 - (absAngle / 30) * 0.45
-          const scale = 1 - (absAngle / 30) * 0.28
+          // Selected label at 12 o'clock notch: prominent gold, full opacity
+          const factor = 1 - (absAngle / 30) * 0.12
+          const scale = 1 - (absAngle / 30) * 0.10
           el.style.opacity = factor.toFixed(2)
           el.style.transform = `scale(${scale.toFixed(2)})`
-        } else if (absAngle <= 90) {
-          // Neighbours at +-60 degrees: ~14px (scale 0.72), ~55% opacity
-          const factor = Math.max(0, 0.55 * (1 - (absAngle - 60) / 45))
+        } else if (absAngle <= 95) {
+          // Adjacent options at respective dial tick marks: clearly visible with solid opacity
+          const factor = 0.85 - ((absAngle - 30) / 65) * 0.15
           el.style.opacity = factor.toFixed(2)
-          el.style.transform = "scale(0.72)"
+          el.style.transform = "scale(0.84)"
+        } else if (absAngle <= 135) {
+          // Lower visible marks along the dial rim: still clearly legible
+          const factor = Math.max(0, 0.70 - ((absAngle - 95) / 40) * 0.35)
+          el.style.opacity = factor.toFixed(2)
+          el.style.transform = "scale(0.76)"
         } else {
-          // Labels farther round (+-120 degrees): hidden below screen
+          // Hidden below bottom horizon
           el.style.opacity = "0"
         }
       })
@@ -636,27 +641,28 @@ export function MobileRotaryDial() {
                     }}
                     className="cursor-pointer"
                   >
-                    {/* Index "01"-"06" above title at radius 418 */}
+                    {/* Index "01"-"06" above title at radius 416 */}
                     <text
                       x="500"
-                      y={500 - 418}
+                      y={500 - 416}
                       textAnchor="middle"
                       fill="#f1d58a"
-                      className="font-mono text-[13px] font-bold tracking-widest uppercase select-none"
+                      className="font-mono text-[13px] font-bold tracking-widest uppercase select-none drop-shadow"
                     >
                       {item.number}
                     </text>
 
-                    {/* Full Name Centred along tangent at radius 390 */}
+                    {/* Full Dashboard Name Centred along tangent at radius 388 below inside dial stick */}
                     <text
                       x="500"
-                      y={500 - 390}
+                      y={500 - 388}
                       textAnchor="middle"
                       fill="#fff3c4"
                       className="font-display font-semibold select-none transition-colors"
                       style={{
-                        fontSize: "20px",
-                        letterSpacing: "0.06em",
+                        fontSize: "19px",
+                        letterSpacing: "0.05em",
+                        textShadow: "0 2px 10px rgba(0,0,0,0.95), 0 0 12px rgba(212,162,76,0.4)",
                       }}
                     >
                       {item.title}
