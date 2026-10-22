@@ -299,6 +299,74 @@ export const PILLARS_CONTENT: ClubPillar[] = [
   },
 ]
 
+export interface CalendarEvent {
+  month: string
+  shortMonth: string
+  title: string
+  category: string
+  description: string
+  iconName: string
+}
+
+export const CALENDAR_EVENTS_2026_27: CalendarEvent[] = [
+  {
+    month: "October",
+    shortMonth: "OCT",
+    title: "Technical Events",
+    category: "Technical",
+    description: "Kick off the academic year with competitive technical challenges and problem-solving events.",
+    iconName: "Terminal",
+  },
+  {
+    month: "November",
+    shortMonth: "NOV",
+    title: "Membership Drive & Events",
+    category: "Recruitment",
+    description: "Open recruitment drive for new members along with introductory events to showcase the club's culture.",
+    iconName: "Users",
+  },
+  {
+    month: "December",
+    shortMonth: "DEC",
+    title: "Workshop",
+    category: "Hands-on Learning",
+    description: "Hands-on technical workshop sessions covering emerging technologies and practical skill-building.",
+    iconName: "Wrench",
+  },
+  {
+    month: "February",
+    shortMonth: "FEB",
+    title: "2-Day E-Waste Hackathon",
+    category: "Sustainable Innovation",
+    description: "A 2-day hackathon where participants build innovative solutions from scavenged e-waste components.",
+    iconName: "Recycle",
+  },
+  {
+    month: "March",
+    shortMonth: "MAR",
+    title: "Workshop",
+    category: "Hands-on Learning",
+    description: "Advanced workshop sessions bridging academic theory with industry-relevant hands-on projects.",
+    iconName: "Cpu",
+  },
+  {
+    month: "April",
+    shortMonth: "APRIL",
+    title: "Technical Events",
+    category: "Technical",
+    description: "High-intensity technical competitions including coding challenges, forensics, and AI events.",
+    iconName: "Binary",
+  },
+  {
+    month: "May",
+    shortMonth: "MAY",
+    title: "Industry Visit",
+    category: "Corporate Bridge",
+    description: "Curated field visits to tech parks, industrial labs, and embedded manufacturing facilities.",
+    iconName: "Building2",
+  },
+]
+
 export const SIGNATURE_EVENTS: EventItem[] = [
   {
     id: "code-heist",
