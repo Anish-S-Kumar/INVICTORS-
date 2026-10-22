@@ -33,7 +33,7 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div id="main-content" className="relative h-[100dvh] w-full flex flex-col overflow-hidden select-none bg-[#050505]">
+    <div id="main-content" className="relative h-[100dvh] w-full flex flex-col overflow-hidden select-none" style={{ background: "transparent" }}>
       {/* Dev-only alignment & concentricity debug overlay (?debug=1) */}
       <DebugOverlay />
 

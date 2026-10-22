@@ -2,484 +2,400 @@
 
 import React, { useEffect, useRef } from "react"
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function rnd(a: number, b: number) { return a + Math.random() * (b - a) }
+function rndInt(a: number, b: number) { return Math.floor(rnd(a, b + 1)) }
+const HEX = "0123456789ABCDEF"
+const BIN = "01"
+function rndChar(bin: boolean) { const s = bin ? BIN : HEX; return s[Math.floor(Math.random() * s.length)] }
+
+// Amber gold colour constants
+const G  = "212,162,76"   // amber gold
+const GB = "255,210,100"  // bright gold for node cores
+
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface Node {
-  x: number
-  y: number
-  vx: number
-  vy: number
-  baseRadius: number
-  pulsePhase: number
-  pulseSpeed: number
-  brightness: number
-  isPulser: boolean
-}
-
-interface Particle {
-  x: number
-  y: number
-  vx: number
-  vy: number
-  radius: number
-  alpha: number
-  alphaDir: number
-  alphaSpeed: number
-}
-
-interface CodeColumn {
-  x: number
-  y: number
-  speed: number
-  chars: string[]
-  opacity: number
-  fontSize: number
-  isBinary: boolean
-}
-
-interface Bokeh {
-  x: number
-  y: number
-  radius: number
-  alpha: number
-  alphaSpeed: number
-  alphaDir: number
-}
-
-interface CircuitTrace {
-  startX: number
-  startY: number
-  segments: { dx: number; dy: number }[]
-  alpha: number
-}
-
-// ─── Constants ────────────────────────────────────────────────────────────────
-const HEX_CHARS = "0123456789ABCDEF"
-const BIN_CHARS = "01"
-const GOLD = "212, 162, 76"
-const GOLD_BRIGHT = "255, 200, 80"
-
-function rnd(min: number, max: number) { return min + Math.random() * (max - min) }
-function rndInt(min: number, max: number) { return Math.floor(rnd(min, max + 1)) }
-function rndChar(isBinary: boolean) {
-  const set = isBinary ? BIN_CHARS : HEX_CHARS
-  return set[Math.floor(Math.random() * set.length)]
-}
+interface Node { x:number; y:number; vx:number; vy:number; r:number; ph:number; ps:number; bri:number; pulser:boolean }
+interface Particle { x:number; y:number; vx:number; vy:number; r:number; a:number; ad:number; as_:number }
+interface Column { x:number; y:number; spd:number; chars:string[]; opa:number; fs:number; bin:boolean }
+interface Bokeh { x:number; y:number; r:number; a:number; as_:number; ad:number }
+interface Trace { ox:number; oy:number; segs:{dx:number;dy:number}[]; a:number }
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function NeuralBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext("2d")
+    const cv = canvasRef.current
+    if (!cv) return
+    const ctx = cv.getContext("2d")
     if (!ctx) return
 
-    // Reduced-motion check: skip animation entirely
-    try {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
-    } catch { /* ignore */ }
+    try { if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return } catch {}
 
-    let animId: number
+    let raf: number
     let W = 0, H = 0
 
-    let nodes: Node[] = []
-    let particles: Particle[] = []
-    let codeColumns: CodeColumn[] = []
-    let bokeh: Bokeh[] = []
-    let traces: CircuitTrace[] = []
+    let nodes:    Node[]     = []
+    let particles:Particle[] = []
+    let columns:  Column[]   = []
+    let bokeh:    Bokeh[]    = []
+    let traces:   Trace[]    = []
 
-    // ── Build circuit traces anchored to pulser nodes ──────────────────────
-    function buildTraces(pulserNodes: Node[]) {
-      traces = pulserNodes.flatMap(n => {
-        const count = rndInt(1, 3)
-        return Array.from({ length: count }, () => {
-          const segCount = rndInt(2, 5)
-          const segs = Array.from({ length: segCount }, (_, i) => {
-            const isHoriz = i % 2 === 0
-            return {
-              dx: isHoriz ? rnd(20, 60) * (Math.random() > 0.5 ? 1 : -1) : 0,
-              dy: isHoriz ? 0 : rnd(15, 40) * (Math.random() > 0.5 ? 1 : -1),
-            }
-          })
-          return {
-            startX: n.x,
-            startY: n.y,
-            segments: segs,
-            alpha: rnd(0.06, 0.18),
-          }
-        })
-      })
+    // ── Right-side zone helpers ──────────────────────────────────────────────
+    // The "active zone" is the rightmost 55% of the screen.
+    // A smaller cluster of anchor nodes sits in the far right 30%.
+    function rightX(minFrac = 0.45, maxFrac = 0.99) { return rnd(W * minFrac, W * maxFrac) }
+    function rightY() { return rnd(H * 0.02, H * 0.98) }
+
+    // ── Build traces from pulser nodes ───────────────────────────────────────
+    function buildTraces(pulsers: Node[]) {
+      traces = pulsers.flatMap(n =>
+        Array.from({ length: rndInt(1, 3) }, () => ({
+          ox: n.x, oy: n.y,
+          a:  rnd(0.08, 0.22),
+          segs: Array.from({ length: rndInt(3, 6) }, (_, i) => ({
+            dx: (i % 2 === 0) ? rnd(20, 70) * (Math.random() > .5 ? 1 : -1) : 0,
+            dy: (i % 2 === 0) ? 0           : rnd(15, 50) * (Math.random() > .5 ? 1 : -1),
+          }))
+        }))
+      )
     }
 
+    // ── Init ─────────────────────────────────────────────────────────────────
     function init() {
-      W = canvas.width = window.innerWidth
-      H = canvas.height = window.innerHeight
+      W = cv.width  = window.innerWidth
+      H = cv.height = window.innerHeight
 
-      // ── Nodes (right-biased) ─────────────────────────────────────────────
-      const totalNodes = Math.min(32, Math.max(18, Math.floor(W / 55)))
-      nodes = Array.from({ length: totalNodes }, (_, i) => {
-        const isFarLeft = i < 3
-        const xMin = isFarLeft ? W * 0.02 : W * 0.28
-        const xMax = isFarLeft ? W * 0.22 : W * 0.97
-        return {
-          x: rnd(xMin, xMax),
-          y: rnd(0, H),
-          vx: rnd(-0.12, 0.12),
-          vy: rnd(-0.12, 0.12),
-          baseRadius: rnd(2, 5),
-          pulsePhase: rnd(0, Math.PI * 2),
-          pulseSpeed: rnd(0.008, 0.025),
-          brightness: rnd(0.55, 1),
-          isPulser: Math.random() < 0.28,
-        }
-      })
+      const isMobile = W < 768
 
-      // ── Circuit traces ───────────────────────────────────────────────────
-      buildTraces(nodes.filter(n => n.isPulser))
+      // ── Nodes ──────────────────────────────────────────────────────────────
+      // Far-right cluster: dense bright constellation
+      const clusterCount = isMobile ? 12 : 22
+      const scattered    = isMobile ? 6  : 14
+      const leftAnchors  = 3
 
-      // ── Particles ────────────────────────────────────────────────────────
-      const totalParticles = Math.min(80, Math.floor((W * H) / 14000))
-      particles = Array.from({ length: totalParticles }, () => ({
-        x: rnd(W * 0.1, W),
+      nodes = [
+        // Far-right dense cluster (right 30%)
+        ...Array.from({ length: clusterCount }, () => ({
+          x: rnd(W * 0.70, W * 0.98),
+          y: rightY(),
+          vx: rnd(-0.10, 0.10), vy: rnd(-0.10, 0.10),
+          r: rnd(2.5, 5.5), ph: rnd(0, Math.PI * 2),
+          ps: rnd(0.012, 0.030), bri: rnd(0.7, 1.0),
+          pulser: Math.random() < 0.4,
+        })),
+        // Mid-right scattered (45%–70%)
+        ...Array.from({ length: scattered }, () => ({
+          x: rnd(W * 0.45, W * 0.70),
+          y: rightY(),
+          vx: rnd(-0.10, 0.10), vy: rnd(-0.10, 0.10),
+          r: rnd(1.8, 3.8), ph: rnd(0, Math.PI * 2),
+          ps: rnd(0.008, 0.020), bri: rnd(0.5, 0.85),
+          pulser: Math.random() < 0.25,
+        })),
+        // Far-left tiny anchors for connectivity (0–18%)
+        ...Array.from({ length: leftAnchors }, () => ({
+          x: rnd(W * 0.01, W * 0.18),
+          y: rightY(),
+          vx: rnd(-0.07, 0.07), vy: rnd(-0.07, 0.07),
+          r: rnd(1.2, 2.5), ph: rnd(0, Math.PI * 2),
+          ps: rnd(0.006, 0.015), bri: rnd(0.3, 0.55),
+          pulser: false,
+        })),
+      ]
+
+      buildTraces(nodes.filter(n => n.pulser))
+
+      // ── Particles (right-heavy) ─────────────────────────────────────────────
+      particles = Array.from({ length: isMobile ? 40 : 80 }, () => ({
+        x: rnd(W * 0.30, W),
         y: rnd(0, H),
-        vx: rnd(-0.18, 0.18),
-        vy: rnd(-0.18, 0.18),
-        radius: rnd(0.4, 1.8),
-        alpha: rnd(0.05, 0.45),
-        alphaDir: Math.random() > 0.5 ? 1 : -1,
-        alphaSpeed: rnd(0.001, 0.005),
+        vx: rnd(-0.2, 0.2), vy: rnd(-0.2, 0.2),
+        r: rnd(0.4, 2.2), a: rnd(0.05, 0.55),
+        ad: Math.random() > .5 ? 1 : -1, as_: rnd(0.001, 0.006),
       }))
 
-      // ── Code rain columns ────────────────────────────────────────────────
-      const totalCols = Math.min(22, Math.floor(W / 60))
-      codeColumns = Array.from({ length: totalCols }, () => {
-        const isBin = Math.random() < 0.35
-        const fontSize = rnd(9, 13)
-        const charCount = rndInt(6, 18)
+      // ── Code rain (right 55%+ of screen) ──────────────────────────────────
+      const colCount = isMobile ? 10 : 20
+      columns = Array.from({ length: colCount }, () => {
+        const bin = Math.random() < 0.3
+        const fs  = rnd(9, 14)
+        const n   = rndInt(5, 20)
         return {
-          x: rnd(W * 0.15, W * 0.98),
-          y: rnd(-H, 0),
-          speed: rnd(0.25, 0.7),
-          chars: Array.from({ length: charCount }, () => rndChar(isBin)),
-          opacity: rnd(0.03, 0.09),
-          fontSize,
-          isBinary: isBin,
+          x:   rnd(W * 0.40, W * 0.99),
+          y:   rnd(-H, 0),
+          spd: rnd(0.3, 0.85),
+          chars: Array.from({ length: n }, () => rndChar(bin)),
+          opa: rnd(0.05, 0.13),
+          fs, bin,
         }
       })
 
-      // ── Bokeh ────────────────────────────────────────────────────────────
-      bokeh = Array.from({ length: 9 }, () => ({
-        x: rnd(W * 0.25, W),
+      // ── Bokeh blobs (right 40%+) ─────────────────────────────────────────
+      bokeh = Array.from({ length: isMobile ? 6 : 11 }, () => ({
+        x: rnd(W * 0.40, W * 0.98),
         y: rnd(0, H),
-        radius: rnd(50, 160),
-        alpha: rnd(0.008, 0.035),
-        alphaSpeed: rnd(0.0003, 0.0009),
-        alphaDir: 1,
+        r: rnd(60, 200),
+        a: rnd(0.012, 0.048),
+        as_: rnd(0.0004, 0.0012), ad: 1,
       }))
     }
 
-    // ── Draw helpers ──────────────────────────────────────────────────────────
-    function drawBackground() {
+    // ── Draw: background ──────────────────────────────────────────────────────
+    function drawBG() {
       ctx.fillStyle = "#000000"
       ctx.fillRect(0, 0, W, H)
 
-      // Soft amber radial bloom on right side
-      const bloom = ctx.createRadialGradient(W * 0.72, H * 0.38, 0, W * 0.72, H * 0.38, W * 0.55)
-      bloom.addColorStop(0, `rgba(${GOLD}, 0.028)`)
+      // Warm amber bloom, centred at right
+      const bloom = ctx.createRadialGradient(W * 0.80, H * 0.40, 0, W * 0.80, H * 0.40, W * 0.60)
+      bloom.addColorStop(0, `rgba(${G},0.038)`)
+      bloom.addColorStop(0.5,`rgba(${G},0.012)`)
       bloom.addColorStop(1, "rgba(0,0,0,0)")
       ctx.fillStyle = bloom
       ctx.fillRect(0, 0, W, H)
 
-      // Feather left edge to pure black
-      const leftFade = ctx.createLinearGradient(0, 0, W * 0.35, 0)
-      leftFade.addColorStop(0, "rgba(0,0,0,1)")
-      leftFade.addColorStop(1, "rgba(0,0,0,0)")
-      ctx.fillStyle = leftFade
+      // Feather left 40% to pure black so right dominates
+      const fade = ctx.createLinearGradient(0, 0, W * 0.45, 0)
+      fade.addColorStop(0, "rgba(0,0,0,1)")
+      fade.addColorStop(1, "rgba(0,0,0,0)")
+      ctx.fillStyle = fade
       ctx.fillRect(0, 0, W, H)
     }
 
+    // ── Draw: bokeh ──────────────────────────────────────────────────────────
     function drawBokeh() {
       bokeh.forEach(b => {
-        b.alpha += b.alphaSpeed * b.alphaDir
-        if (b.alpha > 0.045 || b.alpha < 0.004) b.alphaDir *= -1
-        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.radius)
-        g.addColorStop(0, `rgba(${GOLD}, ${b.alpha})`)
+        b.a += b.as_ * b.ad
+        if (b.a > 0.055 || b.a < 0.006) b.ad *= -1
+        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r)
+        g.addColorStop(0, `rgba(${G},${b.a})`)
         g.addColorStop(1, "rgba(0,0,0,0)")
         ctx.fillStyle = g
-        ctx.beginPath()
-        ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2)
-        ctx.fill()
+        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill()
       })
     }
 
+    // ── Draw: code rain ──────────────────────────────────────────────────────
     function drawCodeRain() {
-      codeColumns.forEach(col => {
-        col.y += col.speed
-        const totalH = col.chars.length * col.fontSize * 1.5
+      columns.forEach(col => {
+        col.y += col.spd
+        const totalH = col.chars.length * col.fs * 1.5
         if (col.y > H + totalH) {
           col.y = -totalH
-          col.chars = col.chars.map(() => rndChar(col.isBinary))
+          col.chars = col.chars.map(() => rndChar(col.bin))
         }
-        // Occasionally mutate a char for flickering effect
-        if (Math.random() < 0.015) {
-          col.chars[rndInt(0, col.chars.length - 1)] = rndChar(col.isBinary)
-        }
+        if (Math.random() < 0.018) col.chars[rndInt(0, col.chars.length - 1)] = rndChar(col.bin)
 
-        ctx.font = `${col.fontSize}px "Courier New", monospace`
+        ctx.font = `${col.fs}px "Courier New",monospace`
         col.chars.forEach((ch, i) => {
-          const yPos = col.y + i * col.fontSize * 1.5
-          // Leading char is brighter
-          const alphaMult = i === 0 ? 2.2 : i === 1 ? 1.4 : 1
-          ctx.fillStyle = `rgba(${GOLD}, ${Math.min(0.95, col.opacity * alphaMult)})`
-          ctx.fillText(ch, col.x, yPos)
+          const alpha = col.opa * (i === 0 ? 2.5 : i === 1 ? 1.6 : 1)
+          ctx.fillStyle = `rgba(${G},${Math.min(0.95, alpha)})`
+          ctx.fillText(ch, col.x, col.y + i * col.fs * 1.5)
         })
       })
     }
 
-    function drawCircuitTraces() {
+    // ── Draw: circuit traces ──────────────────────────────────────────────────
+    function drawTraces(time: number) {
       traces.forEach(tr => {
         ctx.save()
-        ctx.strokeStyle = `rgba(${GOLD}, ${tr.alpha})`
-        ctx.lineWidth = 0.6
-        ctx.setLineDash([4, 6])
-        ctx.lineDashOffset = (Date.now() * 0.02) % 10
+        ctx.strokeStyle = `rgba(${G},${tr.a})`
+        ctx.lineWidth = 0.7
+        ctx.setLineDash([5, 8])
+        ctx.lineDashOffset = -(time * 0.018) % 13
 
-        let cx = tr.startX, cy = tr.startY
-        ctx.beginPath()
-        ctx.moveTo(cx, cy)
-        tr.segments.forEach(seg => {
-          cx += seg.dx
-          cy += seg.dy
-          ctx.lineTo(cx, cy)
-        })
+        let cx = tr.ox, cy = tr.oy
+        ctx.beginPath(); ctx.moveTo(cx, cy)
+        tr.segs.forEach(s => { cx += s.dx; cy += s.dy; ctx.lineTo(cx, cy) })
         ctx.stroke()
 
-        // Endpoint dot
+        // Terminal dot
         ctx.setLineDash([])
-        ctx.fillStyle = `rgba(${GOLD}, ${tr.alpha * 1.5})`
-        ctx.beginPath()
-        ctx.arc(cx, cy, 1.5, 0, Math.PI * 2)
-        ctx.fill()
-
+        ctx.fillStyle = `rgba(${GB},${tr.a * 1.8})`
+        ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI * 2); ctx.fill()
         ctx.restore()
       })
     }
 
+    // ── Draw: connections between nodes ──────────────────────────────────────
     function drawConnections() {
-      const MAX_DIST = W < 768 ? 140 : 200
+      const MAX = W < 768 ? 130 : 210
       for (let i = 0; i < nodes.length; i++) {
         for (let j = i + 1; j < nodes.length; j++) {
           const dx = nodes[i].x - nodes[j].x
           const dy = nodes[i].y - nodes[j].y
-          const dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist >= MAX_DIST) continue
-
-          const base = (1 - dist / MAX_DIST) * 0.35
-          // Nodes further right glow more
-          const rightBoost = (nodes[i].x + nodes[j].x) / (2 * W)
-          const alpha = base * (0.3 + rightBoost * 0.7)
-
-          ctx.strokeStyle = `rgba(${GOLD}, ${alpha})`
-          ctx.lineWidth = 0.6
-          ctx.beginPath()
-          ctx.moveTo(nodes[i].x, nodes[i].y)
-          ctx.lineTo(nodes[j].x, nodes[j].y)
-          ctx.stroke()
+          const d  = Math.sqrt(dx * dx + dy * dy)
+          if (d >= MAX) continue
+          // Opacity proportional to proximity AND average rightness
+          const base      = (1 - d / MAX) * 0.5
+          const rightness = (nodes[i].x + nodes[j].x) / (2 * W)
+          const alpha     = base * (0.25 + rightness * 0.75)
+          ctx.strokeStyle = `rgba(${G},${alpha})`
+          ctx.lineWidth   = 0.7
+          ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke()
         }
       }
     }
 
-    function drawNodes(time: number) {
+    // ── Draw: nodes ──────────────────────────────────────────────────────────
+    function drawNodes() {
       nodes.forEach(n => {
-        n.pulsePhase += n.pulseSpeed
-        const pulseFactor = n.isPulser
-          ? 0.5 + 0.5 * Math.sin(n.pulsePhase)
-          : 0.75 + 0.1 * Math.sin(n.pulsePhase * 0.5)
+        n.ph += n.ps
+        const pf = n.pulser ? 0.5 + 0.5 * Math.sin(n.ph) : 0.75 + 0.1 * Math.sin(n.ph * 0.5)
+        const r  = n.r * (1 + (n.pulser ? 0.45 : 0.1) * pf)
+        const gr = r * (n.pulser ? 6 + 3 * pf : 3.5)
 
-        const radius = n.baseRadius * (1 + (n.isPulser ? 0.4 : 0.1) * pulseFactor)
-        const glowR = radius * (n.isPulser ? 5 + 3 * pulseFactor : 3.5)
-
-        // Outer glow
-        const glow = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR)
-        const gi = n.brightness * pulseFactor
-        glow.addColorStop(0, `rgba(${GOLD}, ${0.3 * gi})`)
-        glow.addColorStop(0.35, `rgba(${GOLD}, ${0.1 * gi})`)
+        // Glow halo
+        const glow = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, gr)
+        glow.addColorStop(0, `rgba(${G},${0.38 * pf * n.bri})`)
+        glow.addColorStop(0.4,`rgba(${G},${0.12 * pf * n.bri})`)
         glow.addColorStop(1, "rgba(0,0,0,0)")
         ctx.fillStyle = glow
-        ctx.beginPath()
-        ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2)
-        ctx.fill()
+        ctx.beginPath(); ctx.arc(n.x, n.y, gr, 0, Math.PI * 2); ctx.fill()
 
         // Core
-        ctx.fillStyle = `rgba(${GOLD_BRIGHT}, ${(0.65 + 0.35 * pulseFactor) * n.brightness})`
-        ctx.beginPath()
-        ctx.arc(n.x, n.y, radius, 0, Math.PI * 2)
-        ctx.fill()
+        ctx.fillStyle = `rgba(${GB},${(0.6 + 0.4 * pf) * n.bri})`
+        ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill()
 
-        // Ring on pulsers
-        if (n.isPulser) {
-          const ringAlpha = 0.15 * pulseFactor * n.brightness
-          ctx.strokeStyle = `rgba(${GOLD}, ${ringAlpha})`
+        // Outer ring for pulsers
+        if (n.pulser) {
+          ctx.strokeStyle = `rgba(${G},${0.18 * pf * n.bri})`
           ctx.lineWidth = 0.8
-          ctx.beginPath()
-          ctx.arc(n.x, n.y, radius * 2.2, 0, Math.PI * 2)
+          ctx.beginPath(); ctx.arc(n.x, n.y, r * 2.5, 0, Math.PI * 2); ctx.stroke()
+          ctx.beginPath(); ctx.arc(n.x, n.y, r * 4, 0, Math.PI * 2)
+          ctx.strokeStyle = `rgba(${G},${0.06 * pf * n.bri})`
           ctx.stroke()
         }
       })
     }
 
+    // ── Draw: particles ──────────────────────────────────────────────────────
     function drawParticles() {
       particles.forEach(p => {
-        p.alpha += p.alphaSpeed * p.alphaDir
-        if (p.alpha > 0.5 || p.alpha < 0.03) p.alphaDir *= -1
-        p.x += p.vx
-        p.y += p.vy
-        if (p.x < 0) p.x = W
-        if (p.x > W) p.x = 0
-        if (p.y < 0) p.y = H
-        if (p.y > H) p.y = 0
-
-        ctx.fillStyle = `rgba(${GOLD}, ${p.alpha * 0.6})`
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2)
-        ctx.fill()
+        p.a += p.as_ * p.ad; if (p.a > 0.55 || p.a < 0.03) p.ad *= -1
+        p.x += p.vx; p.y += p.vy
+        if (p.x < W * 0.25) p.x = W * 0.99
+        if (p.x > W)        p.x = W * 0.30
+        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
+        ctx.fillStyle = `rgba(${G},${p.a * 0.65})`
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill()
       })
     }
 
-    function drawMagnifyingGlass() {
-      const cx = W * 0.77
-      const cy = H * 0.3
-      const r = Math.min(32, W * 0.025)
-      const baseAlpha = 0.055
+    // ── Draw: magnifying glass (far right, mid-height) ───────────────────────
+    function drawMagnifier() {
+      const cx = W * 0.84, cy = H * 0.28
+      const r  = Math.max(22, Math.min(36, W * 0.022))
+      const al = 0.10
 
       ctx.save()
-      ctx.strokeStyle = `rgba(${GOLD}, ${baseAlpha})`
-      ctx.lineWidth = 1.2
+      ctx.strokeStyle = `rgba(${G},${al})`; ctx.lineWidth = 1.3
 
-      // Lens circle
-      ctx.beginPath()
-      ctx.arc(cx, cy, r, 0, Math.PI * 2)
-      ctx.stroke()
+      // Lens
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke()
 
       // Handle
       const ang = Math.PI / 4
-      const hx1 = cx + r * Math.cos(ang)
-      const hy1 = cy + r * Math.sin(ang)
+      const hx  = cx + r * Math.cos(ang), hy = cy + r * Math.sin(ang)
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + r * 0.9, hy + r * 0.9); ctx.stroke()
+
+      // Crosshair
+      ctx.strokeStyle = `rgba(${G},${al * 0.45})`; ctx.lineWidth = 0.5
       ctx.beginPath()
-      ctx.moveTo(hx1, hy1)
-      ctx.lineTo(hx1 + r * 0.85, hy1 + r * 0.85)
+      ctx.moveTo(cx - r * 0.6, cy); ctx.lineTo(cx + r * 0.6, cy)
+      ctx.moveTo(cx, cy - r * 0.6); ctx.lineTo(cx, cy + r * 0.6)
       ctx.stroke()
 
-      // Inner cross-hair
-      ctx.strokeStyle = `rgba(${GOLD}, ${baseAlpha * 0.5})`
-      ctx.lineWidth = 0.5
-      ctx.beginPath()
-      ctx.moveTo(cx - r * 0.55, cy)
-      ctx.lineTo(cx + r * 0.55, cy)
-      ctx.moveTo(cx, cy - r * 0.55)
-      ctx.lineTo(cx, cy + r * 0.55)
-      ctx.stroke()
-
-      // Small corner brackets inside lens
-      const b = r * 0.38
-      ;[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx, sy]) => {
-        ctx.beginPath()
-        ctx.moveTo(cx + sx * b, cy + sy * (b - r * 0.15))
-        ctx.lineTo(cx + sx * b, cy + sy * b)
-        ctx.lineTo(cx + sx * (b - r * 0.15), cy + sy * b)
-        ctx.stroke()
+      // Inner target rings
+      ctx.strokeStyle = `rgba(${G},${al * 0.3})`
+      ;[0.35, 0.65].forEach(frac => {
+        ctx.beginPath(); ctx.arc(cx, cy, r * frac, 0, Math.PI * 2); ctx.stroke()
       })
 
+      // Corner brackets
+      const bLen = r * 0.35
+      ctx.strokeStyle = `rgba(${G},${al * 0.8})`; ctx.lineWidth = 1.0
+      ;[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx, sy]) => {
+        const bx = cx + (sx as number) * r * 0.62, by = cy + (sy as number) * r * 0.62
+        ctx.beginPath()
+        ctx.moveTo(bx, by + (sy as number) * bLen); ctx.lineTo(bx, by); ctx.lineTo(bx + (sx as number) * bLen, by)
+        ctx.stroke()
+      })
       ctx.restore()
     }
 
+    // ── Draw: fingerprint scan (bottom-right) ─────────────────────────────────
     function drawFingerprint(time: number) {
-      const cx = W * 0.87
-      const cy = H * 0.7
-      const alpha = 0.045
-      const ringCount = 9
+      const cx = W * 0.90, cy = H * 0.72
+      const al = 0.065
+      const rings = 10
 
       ctx.save()
-      ctx.strokeStyle = `rgba(${GOLD}, ${alpha})`
-      ctx.lineWidth = 0.7
+      ctx.strokeStyle = `rgba(${G},${al})`; ctx.lineWidth = 0.8
 
-      // Concentric partial ellipses (fingerprint ridges)
-      for (let i = 1; i <= ringCount; i++) {
-        const rx = i * 5.5
-        const ry = i * 8.5
-        const gap = 0.22 + i * 0.012 // grow the gap slightly per ring
-        ctx.beginPath()
-        ctx.ellipse(cx, cy, rx, ry, 0, Math.PI * gap, Math.PI * (1 - gap))
-        ctx.stroke()
-        ctx.beginPath()
-        ctx.ellipse(cx, cy, rx, ry, 0, Math.PI * (1 + gap), Math.PI * (2 - gap))
-        ctx.stroke()
+      for (let i = 1; i <= rings; i++) {
+        const rx = i * 5.5, ry = i * 8.8
+        const gap = 0.20 + i * 0.011
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0,  Math.PI * gap,       Math.PI * (1 - gap));      ctx.stroke()
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0,  Math.PI * (1 + gap), Math.PI * (2 - gap)); ctx.stroke()
       }
 
-      // Animated horizontal scan line
-      const scanAlpha = alpha * 0.8 * (0.5 + 0.5 * Math.sin(time * 0.0015))
-      ctx.strokeStyle = `rgba(${GOLD}, ${scanAlpha})`
-      ctx.lineWidth = 1
+      // Scan line (animated)
+      const scanA = al * 0.9 * (0.5 + 0.5 * Math.sin(time * 0.0016))
+      ctx.strokeStyle = `rgba(${GB},${scanA})`; ctx.lineWidth = 1.2
       ctx.beginPath()
-      ctx.moveTo(cx - ringCount * 5.5 - 4, cy)
-      ctx.lineTo(cx + ringCount * 5.5 + 4, cy)
-      ctx.stroke()
+      ctx.moveTo(cx - rings * 5.5 - 6, cy); ctx.lineTo(cx + rings * 5.5 + 6, cy); ctx.stroke()
 
       // Corner scan brackets
-      const bw = ringCount * 5.5 + 6
-      const bh = ringCount * 8.5 + 6
-      const bLen = 8
-      ctx.strokeStyle = `rgba(${GOLD}, ${alpha * 1.4})`
-      ctx.lineWidth = 0.8
-      ;[[cx - bw, cy - bh, 1, 1],[cx + bw, cy - bh, -1, 1],
-        [cx + bw, cy + bh, -1, -1],[cx - bw, cy + bh, 1, -1]].forEach(([x, y, sx, sy]) => {
-        ctx.beginPath()
-        ctx.moveTo(x as number, (y as number) + (sy as number) * bLen)
-        ctx.lineTo(x as number, y as number)
-        ctx.lineTo((x as number) + (sx as number) * bLen, y as number)
-        ctx.stroke()
-      })
-
+      const bw = rings * 5.5 + 8, bh = rings * 8.8 + 8, bLen = 9
+      ctx.strokeStyle = `rgba(${G},${al * 1.4})`; ctx.lineWidth = 0.9
+      ;[[cx-bw, cy-bh, 1, 1],[cx+bw, cy-bh,-1, 1],[cx+bw, cy+bh,-1,-1],[cx-bw, cy+bh, 1,-1]]
+        .forEach(([x, y, sx, sy]) => {
+          ctx.beginPath()
+          ctx.moveTo(x as number, (y as number) + (sy as number) * bLen)
+          ctx.lineTo(x as number, y as number)
+          ctx.lineTo((x as number) + (sx as number) * bLen, y as number)
+          ctx.stroke()
+        })
       ctx.restore()
     }
 
+    // ── Update node positions ─────────────────────────────────────────────────
     function updateNodes() {
       nodes.forEach(n => {
-        n.x += n.vx
-        n.y += n.vy
+        n.x += n.vx; n.y += n.vy
+        // Bounce
         if (n.x < 0 || n.x > W) n.vx *= -1
         if (n.y < 0 || n.y > H) n.vy *= -1
-        // Gently push stray nodes back to the right
-        if (n.x < W * 0.04) n.vx = Math.abs(n.vx) * 0.8
+        // Prevent drifting too far left: push left-most cluster back
+        if (n.x < W * 0.05) n.vx = Math.abs(n.vx)
+        // Prevent dense cluster spreading too far left
+        if (n.x < W * 0.35 && n.vx < 0) n.vx *= -0.7
       })
     }
 
-    // ── Animation loop ────────────────────────────────────────────────────────
+    // ── RAF loop ──────────────────────────────────────────────────────────────
     function loop(time: number) {
       ctx.clearRect(0, 0, W, H)
-      drawBackground()
+      drawBG()
       drawBokeh()
       drawCodeRain()
-      drawCircuitTraces()
+      drawTraces(time)
       drawConnections()
-      drawNodes(time)
+      drawNodes()
       drawParticles()
-      drawMagnifyingGlass()
+      drawMagnifier()
       drawFingerprint(time)
       updateNodes()
-      animId = requestAnimationFrame(loop)
+      raf = requestAnimationFrame(loop)
     }
 
-    const onResize = () => { init() }
+    const onResize = () => init()
     window.addEventListener("resize", onResize)
     init()
-    animId = requestAnimationFrame(loop)
+    raf = requestAnimationFrame(loop)
 
-    return () => {
-      cancelAnimationFrame(animId)
-      window.removeEventListener("resize", onResize)
-    }
+    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", onResize) }
   }, [])
 
   return (
