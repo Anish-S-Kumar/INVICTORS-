@@ -29,6 +29,8 @@ export function NeuralBackground() {
     if (!cv) return
     const ctx = cv.getContext("2d")
     if (!ctx) return
+    // Non-null alias so inner closures satisfy TypeScript
+    const c: CanvasRenderingContext2D = ctx
 
     try { if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return } catch {}
 
@@ -63,8 +65,8 @@ export function NeuralBackground() {
 
     // ── Init ─────────────────────────────────────────────────────────────────
     function init() {
-      W = cv.width  = window.innerWidth
-      H = cv.height = window.innerHeight
+      W = cv!.width  = window.innerWidth
+      H = cv!.height = window.innerHeight
 
       const isMobile = W < 768
 
@@ -143,23 +145,23 @@ export function NeuralBackground() {
 
     // ── Draw: background ──────────────────────────────────────────────────────
     function drawBG() {
-      ctx.fillStyle = "#000000"
-      ctx.fillRect(0, 0, W, H)
+      c.fillStyle = "#000000"
+      c.fillRect(0, 0, W, H)
 
       // Warm amber bloom, centred at right
-      const bloom = ctx.createRadialGradient(W * 0.80, H * 0.40, 0, W * 0.80, H * 0.40, W * 0.60)
+      const bloom = c.createRadialGradient(W * 0.80, H * 0.40, 0, W * 0.80, H * 0.40, W * 0.60)
       bloom.addColorStop(0, `rgba(${G},0.038)`)
       bloom.addColorStop(0.5,`rgba(${G},0.012)`)
       bloom.addColorStop(1, "rgba(0,0,0,0)")
-      ctx.fillStyle = bloom
-      ctx.fillRect(0, 0, W, H)
+      c.fillStyle = bloom
+      c.fillRect(0, 0, W, H)
 
       // Feather left 40% to pure black so right dominates
-      const fade = ctx.createLinearGradient(0, 0, W * 0.45, 0)
+      const fade = c.createLinearGradient(0, 0, W * 0.45, 0)
       fade.addColorStop(0, "rgba(0,0,0,1)")
       fade.addColorStop(1, "rgba(0,0,0,0)")
-      ctx.fillStyle = fade
-      ctx.fillRect(0, 0, W, H)
+      c.fillStyle = fade
+      c.fillRect(0, 0, W, H)
     }
 
     // ── Draw: bokeh ──────────────────────────────────────────────────────────
@@ -167,11 +169,11 @@ export function NeuralBackground() {
       bokeh.forEach(b => {
         b.a += b.as_ * b.ad
         if (b.a > 0.055 || b.a < 0.006) b.ad *= -1
-        const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r)
+        const g = c.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r)
         g.addColorStop(0, `rgba(${G},${b.a})`)
         g.addColorStop(1, "rgba(0,0,0,0)")
-        ctx.fillStyle = g
-        ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill()
+        c.fillStyle = g
+        c.beginPath(); c.arc(b.x, b.y, b.r, 0, Math.PI * 2); c.fill()
       })
     }
 
@@ -186,11 +188,11 @@ export function NeuralBackground() {
         }
         if (Math.random() < 0.018) col.chars[rndInt(0, col.chars.length - 1)] = rndChar(col.bin)
 
-        ctx.font = `${col.fs}px "Courier New",monospace`
+        c.font = `${col.fs}px "Courier New",monospace`
         col.chars.forEach((ch, i) => {
           const alpha = col.opa * (i === 0 ? 2.5 : i === 1 ? 1.6 : 1)
-          ctx.fillStyle = `rgba(${G},${Math.min(0.95, alpha)})`
-          ctx.fillText(ch, col.x, col.y + i * col.fs * 1.5)
+          c.fillStyle = `rgba(${G},${Math.min(0.95, alpha)})`
+          c.fillText(ch, col.x, col.y + i * col.fs * 1.5)
         })
       })
     }
@@ -198,22 +200,22 @@ export function NeuralBackground() {
     // ── Draw: circuit traces ──────────────────────────────────────────────────
     function drawTraces(time: number) {
       traces.forEach(tr => {
-        ctx.save()
-        ctx.strokeStyle = `rgba(${G},${tr.a})`
-        ctx.lineWidth = 0.7
-        ctx.setLineDash([5, 8])
-        ctx.lineDashOffset = -(time * 0.018) % 13
+        c.save()
+        c.strokeStyle = `rgba(${G},${tr.a})`
+        c.lineWidth = 0.7
+        c.setLineDash([5, 8])
+        c.lineDashOffset = -(time * 0.018) % 13
 
         let cx = tr.ox, cy = tr.oy
-        ctx.beginPath(); ctx.moveTo(cx, cy)
-        tr.segs.forEach(s => { cx += s.dx; cy += s.dy; ctx.lineTo(cx, cy) })
-        ctx.stroke()
+        c.beginPath(); c.moveTo(cx, cy)
+        tr.segs.forEach(s => { cx += s.dx; cy += s.dy; c.lineTo(cx, cy) })
+        c.stroke()
 
         // Terminal dot
-        ctx.setLineDash([])
-        ctx.fillStyle = `rgba(${GB},${tr.a * 1.8})`
-        ctx.beginPath(); ctx.arc(cx, cy, 2, 0, Math.PI * 2); ctx.fill()
-        ctx.restore()
+        c.setLineDash([])
+        c.fillStyle = `rgba(${GB},${tr.a * 1.8})`
+        c.beginPath(); c.arc(cx, cy, 2, 0, Math.PI * 2); c.fill()
+        c.restore()
       })
     }
 
@@ -230,9 +232,9 @@ export function NeuralBackground() {
           const base      = (1 - d / MAX) * 0.5
           const rightness = (nodes[i].x + nodes[j].x) / (2 * W)
           const alpha     = base * (0.25 + rightness * 0.75)
-          ctx.strokeStyle = `rgba(${G},${alpha})`
-          ctx.lineWidth   = 0.7
-          ctx.beginPath(); ctx.moveTo(nodes[i].x, nodes[i].y); ctx.lineTo(nodes[j].x, nodes[j].y); ctx.stroke()
+          c.strokeStyle = `rgba(${G},${alpha})`
+          c.lineWidth   = 0.7
+          c.beginPath(); c.moveTo(nodes[i].x, nodes[i].y); c.lineTo(nodes[j].x, nodes[j].y); c.stroke()
         }
       }
     }
@@ -246,25 +248,25 @@ export function NeuralBackground() {
         const gr = r * (n.pulser ? 6 + 3 * pf : 3.5)
 
         // Glow halo
-        const glow = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, gr)
+        const glow = c.createRadialGradient(n.x, n.y, 0, n.x, n.y, gr)
         glow.addColorStop(0, `rgba(${G},${0.38 * pf * n.bri})`)
         glow.addColorStop(0.4,`rgba(${G},${0.12 * pf * n.bri})`)
         glow.addColorStop(1, "rgba(0,0,0,0)")
-        ctx.fillStyle = glow
-        ctx.beginPath(); ctx.arc(n.x, n.y, gr, 0, Math.PI * 2); ctx.fill()
+        c.fillStyle = glow
+        c.beginPath(); c.arc(n.x, n.y, gr, 0, Math.PI * 2); c.fill()
 
         // Core
-        ctx.fillStyle = `rgba(${GB},${(0.6 + 0.4 * pf) * n.bri})`
-        ctx.beginPath(); ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill()
+        c.fillStyle = `rgba(${GB},${(0.6 + 0.4 * pf) * n.bri})`
+        c.beginPath(); c.arc(n.x, n.y, r, 0, Math.PI * 2); c.fill()
 
         // Outer ring for pulsers
         if (n.pulser) {
-          ctx.strokeStyle = `rgba(${G},${0.18 * pf * n.bri})`
-          ctx.lineWidth = 0.8
-          ctx.beginPath(); ctx.arc(n.x, n.y, r * 2.5, 0, Math.PI * 2); ctx.stroke()
-          ctx.beginPath(); ctx.arc(n.x, n.y, r * 4, 0, Math.PI * 2)
-          ctx.strokeStyle = `rgba(${G},${0.06 * pf * n.bri})`
-          ctx.stroke()
+          c.strokeStyle = `rgba(${G},${0.18 * pf * n.bri})`
+          c.lineWidth = 0.8
+          c.beginPath(); c.arc(n.x, n.y, r * 2.5, 0, Math.PI * 2); c.stroke()
+          c.beginPath(); c.arc(n.x, n.y, r * 4, 0, Math.PI * 2)
+          c.strokeStyle = `rgba(${G},${0.06 * pf * n.bri})`
+          c.stroke()
         }
       })
     }
@@ -277,8 +279,8 @@ export function NeuralBackground() {
         if (p.x < W * 0.25) p.x = W * 0.99
         if (p.x > W)        p.x = W * 0.30
         if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
-        ctx.fillStyle = `rgba(${G},${p.a * 0.65})`
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill()
+        c.fillStyle = `rgba(${G},${p.a * 0.65})`
+        c.beginPath(); c.arc(p.x, p.y, p.r, 0, Math.PI * 2); c.fill()
       })
     }
 
@@ -288,40 +290,40 @@ export function NeuralBackground() {
       const r  = Math.max(22, Math.min(36, W * 0.022))
       const al = 0.10
 
-      ctx.save()
-      ctx.strokeStyle = `rgba(${G},${al})`; ctx.lineWidth = 1.3
+      c.save()
+      c.strokeStyle = `rgba(${G},${al})`; c.lineWidth = 1.3
 
       // Lens
-      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke()
+      c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.stroke()
 
       // Handle
       const ang = Math.PI / 4
       const hx  = cx + r * Math.cos(ang), hy = cy + r * Math.sin(ang)
-      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + r * 0.9, hy + r * 0.9); ctx.stroke()
+      c.beginPath(); c.moveTo(hx, hy); c.lineTo(hx + r * 0.9, hy + r * 0.9); c.stroke()
 
       // Crosshair
-      ctx.strokeStyle = `rgba(${G},${al * 0.45})`; ctx.lineWidth = 0.5
-      ctx.beginPath()
-      ctx.moveTo(cx - r * 0.6, cy); ctx.lineTo(cx + r * 0.6, cy)
-      ctx.moveTo(cx, cy - r * 0.6); ctx.lineTo(cx, cy + r * 0.6)
-      ctx.stroke()
+      c.strokeStyle = `rgba(${G},${al * 0.45})`; c.lineWidth = 0.5
+      c.beginPath()
+      c.moveTo(cx - r * 0.6, cy); c.lineTo(cx + r * 0.6, cy)
+      c.moveTo(cx, cy - r * 0.6); c.lineTo(cx, cy + r * 0.6)
+      c.stroke()
 
       // Inner target rings
-      ctx.strokeStyle = `rgba(${G},${al * 0.3})`
+      c.strokeStyle = `rgba(${G},${al * 0.3})`
       ;[0.35, 0.65].forEach(frac => {
-        ctx.beginPath(); ctx.arc(cx, cy, r * frac, 0, Math.PI * 2); ctx.stroke()
+        c.beginPath(); c.arc(cx, cy, r * frac, 0, Math.PI * 2); c.stroke()
       })
 
       // Corner brackets
       const bLen = r * 0.35
-      ctx.strokeStyle = `rgba(${G},${al * 0.8})`; ctx.lineWidth = 1.0
+      c.strokeStyle = `rgba(${G},${al * 0.8})`; c.lineWidth = 1.0
       ;[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx, sy]) => {
         const bx = cx + (sx as number) * r * 0.62, by = cy + (sy as number) * r * 0.62
-        ctx.beginPath()
-        ctx.moveTo(bx, by + (sy as number) * bLen); ctx.lineTo(bx, by); ctx.lineTo(bx + (sx as number) * bLen, by)
-        ctx.stroke()
+        c.beginPath()
+        c.moveTo(bx, by + (sy as number) * bLen); c.lineTo(bx, by); c.lineTo(bx + (sx as number) * bLen, by)
+        c.stroke()
       })
-      ctx.restore()
+      c.restore()
     }
 
     // ── Draw: fingerprint scan (bottom-right) ─────────────────────────────────
@@ -330,34 +332,34 @@ export function NeuralBackground() {
       const al = 0.065
       const rings = 10
 
-      ctx.save()
-      ctx.strokeStyle = `rgba(${G},${al})`; ctx.lineWidth = 0.8
+      c.save()
+      c.strokeStyle = `rgba(${G},${al})`; c.lineWidth = 0.8
 
       for (let i = 1; i <= rings; i++) {
         const rx = i * 5.5, ry = i * 8.8
         const gap = 0.20 + i * 0.011
-        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0,  Math.PI * gap,       Math.PI * (1 - gap));      ctx.stroke()
-        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0,  Math.PI * (1 + gap), Math.PI * (2 - gap)); ctx.stroke()
+        c.beginPath(); c.ellipse(cx, cy, rx, ry, 0,  Math.PI * gap,       Math.PI * (1 - gap));      c.stroke()
+        c.beginPath(); c.ellipse(cx, cy, rx, ry, 0,  Math.PI * (1 + gap), Math.PI * (2 - gap)); c.stroke()
       }
 
       // Scan line (animated)
       const scanA = al * 0.9 * (0.5 + 0.5 * Math.sin(time * 0.0016))
-      ctx.strokeStyle = `rgba(${GB},${scanA})`; ctx.lineWidth = 1.2
-      ctx.beginPath()
-      ctx.moveTo(cx - rings * 5.5 - 6, cy); ctx.lineTo(cx + rings * 5.5 + 6, cy); ctx.stroke()
+      c.strokeStyle = `rgba(${GB},${scanA})`; c.lineWidth = 1.2
+      c.beginPath()
+      c.moveTo(cx - rings * 5.5 - 6, cy); c.lineTo(cx + rings * 5.5 + 6, cy); c.stroke()
 
       // Corner scan brackets
       const bw = rings * 5.5 + 8, bh = rings * 8.8 + 8, bLen = 9
-      ctx.strokeStyle = `rgba(${G},${al * 1.4})`; ctx.lineWidth = 0.9
+      c.strokeStyle = `rgba(${G},${al * 1.4})`; c.lineWidth = 0.9
       ;[[cx-bw, cy-bh, 1, 1],[cx+bw, cy-bh,-1, 1],[cx+bw, cy+bh,-1,-1],[cx-bw, cy+bh, 1,-1]]
         .forEach(([x, y, sx, sy]) => {
-          ctx.beginPath()
-          ctx.moveTo(x as number, (y as number) + (sy as number) * bLen)
-          ctx.lineTo(x as number, y as number)
-          ctx.lineTo((x as number) + (sx as number) * bLen, y as number)
-          ctx.stroke()
+          c.beginPath()
+          c.moveTo(x as number, (y as number) + (sy as number) * bLen)
+          c.lineTo(x as number, y as number)
+          c.lineTo((x as number) + (sx as number) * bLen, y as number)
+          c.stroke()
         })
-      ctx.restore()
+      c.restore()
     }
 
     // ── Update node positions ─────────────────────────────────────────────────
@@ -376,7 +378,7 @@ export function NeuralBackground() {
 
     // ── RAF loop ──────────────────────────────────────────────────────────────
     function loop(time: number) {
-      ctx.clearRect(0, 0, W, H)
+      c.clearRect(0, 0, W, H)
       drawBG()
       drawBokeh()
       drawCodeRain()
