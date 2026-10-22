@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Orbitron, Rajdhani } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
+import { NeuralBackground } from "@/components/neural-background"
 import "./globals.css"
 
 const orbitron = Orbitron({
@@ -90,7 +91,11 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          {children}
+          {/* Animated black-gold neural network canvas — sits behind all content */}
+          <NeuralBackground />
+          <div className="relative z-10 flex flex-col min-h-screen">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
