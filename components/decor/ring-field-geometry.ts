@@ -1,29 +1,38 @@
 /**
- * Pure Geometry Functions for RingField (v8)
- * Seeded PRNG, trace generation, tick rings, segmented arcs, and data pulses.
+ * PCB Circuit Geometry Generator (v8 Enhanced)
+ * Generates rich, glowing gold circuit traces with right-angle and 45-degree bends,
+ * end-node dots, and data pulse parameters.
  */
 
-export interface TraceData {
+export interface CircuitTrace {
+  id: number
   d: string
-  endNode: { x: number; y: number; r: number; twinkle: boolean }
-  tier: 0 | 1 | 2 // 0: 0.10 opacity, 1: 0.18 opacity, 2: 0.30 opacity
-  isPulseCandidate: boolean
+  opacity: number
+  width: number
+  duration: number
+  delay: number
+  reverse: boolean
+  dashArray: string
+  endNode: {
+    x: number
+    y: number
+    r: number
+    duration: number
+    delay: number
+  }
 }
 
-export interface GeneratedFieldGeometry {
-  tierPaths: [string, string, string] // Path string for tier 0, 1, 2
-  allNodes: Array<{ x: number; y: number; r: number; twinkle: boolean }>
-  pulseTraces: Array<{ d: string; nodeIndex: number; duration: number; delay: number }>
-  tickPath: string
+export interface CircuitFieldGeometry {
+  traces: CircuitTrace[]
+  tickRingPath: string
   segmentedRingPath: string
-  segmentedRingNodes: Array<{ x: number; y: number }>
-  R: number
   cx: number
   cy: number
+  R: number
 }
 
-// Mulberry32 seeded PRNG
-export function createPrng(seed = 0x12345678) {
+// Mulberry32 deterministic PRNG
+export function createPrng(seed = 0x9e3779b9) {
   let s = seed >>> 0
   return function next(): number {
     s = (s + 0x6d2b79f5) >>> 0
@@ -33,19 +42,13 @@ export function createPrng(seed = 0x12345678) {
   }
 }
 
-/**
- * Generate circuit traces, tick marks, and segmented ring paths centered at (cx, cy) with radius R.
- */
-export function generateRingFieldGeometry({
+export function generateCircuitFieldGeometry({
   cx,
   cy,
   R,
   width,
   height,
   isMobile = false,
-  startRadiusRatio = 1.22,
-  rayCountOverride,
-  pulseCount = 18,
 }: {
   cx: number
   cy: number
@@ -53,204 +56,148 @@ export function generateRingFieldGeometry({
   width: number
   height: number
   isMobile?: boolean
-  startRadiusRatio?: number
-  rayCountOverride?: number
-  pulseCount?: number
-}): GeneratedFieldGeometry {
-  const prng = createPrng(0xca11ab1e + Math.round(R * 10))
+}): CircuitFieldGeometry {
+  const prng = createPrng(0x85ebca6b + Math.round(R * 10))
 
-  const N =
-    rayCountOverride ||
-    (isMobile ? 44 : Math.max(48, Math.min(140, Math.round((2 * Math.PI * startRadiusRatio * R) / 16))))
-
+  // Ray count: ~68 on laptop, 38 on mobile
+  const N = isMobile ? 38 : Math.max(54, Math.min(84, Math.round((2 * Math.PI * R) / 22)))
   const step = (2 * Math.PI) / N
-  const traces: TraceData[] = []
-  const maxExtent = Math.max(width, height, R * 3.5)
+  const traces: CircuitTrace[] = []
+
+  const r0 = R * 1.045 // Starts directly at outer edge of golden ring
+  const maxDiagonal = Math.hypot(width, height) / 2 + 60
 
   for (let i = 0; i < N; i++) {
-    // Jitter angle by up to +-0.35 of step
-    const jitter = (prng() * 0.7 - 0.35) * step
+    // Jitter angle slightly
+    const jitter = (prng() * 0.5 - 0.25) * step
     const angle = i * step + jitter
-
     const cosA = Math.cos(angle)
     const sinA = Math.sin(angle)
 
-    const r0 = R * startRadiusRatio
-
-    // ~35% of traces end earlier (1.8R - 2.2R), others reach further (2.4R - 3.8R)
-    const isShort = prng() < 0.35
-    const maxR = isShort
-      ? R * (1.8 + prng() * 0.4)
-      : Math.min(maxExtent, R * (2.4 + prng() * 1.4))
-
-    // Run 1: straight radial segment
-    const r1 = r0 + R * (0.15 + prng() * 0.3)
     const x0 = cx + r0 * cosA
     const y0 = cy + r0 * sinA
-    const x1 = cx + r1 * cosA
-    const y1 = cy + r1 * sinA
 
-    let currentX = x1
-    let currentY = y1
-    let currentR = r1
+    // Length of first radial run
+    const run1Len = R * (0.18 + prng() * 0.35)
+    let currentX = x0 + run1Len * cosA
+    let currentY = y0 + run1Len * sinA
 
-    let pathD = `M ${x0.toFixed(1)} ${y0.toFixed(1)} L ${x1.toFixed(1)} ${y1.toFixed(1)}`
+    let pathD = `M ${x0.toFixed(1)} ${y0.toFixed(1)} L ${currentX.toFixed(1)} ${currentY.toFixed(1)}`
 
-    // 45-degree bend direction
+    // Decide bend type: 90-degree right angle (PCB style) or 45-degree
+    const useRightAngle = prng() > 0.45
     const bendSign = prng() > 0.5 ? 1 : -1
-    const bendAngle = angle + (bendSign * Math.PI) / 4
-    const bendLen = R * (0.08 + prng() * 0.12)
+    const bendAngle = useRightAngle
+      ? angle + (bendSign * Math.PI) / 2
+      : angle + (bendSign * Math.PI) / 4
 
+    const bendLen = R * (0.12 + prng() * 0.25)
     const bx = currentX + bendLen * Math.cos(bendAngle)
     const by = currentY + bendLen * Math.sin(bendAngle)
 
     pathD += ` L ${bx.toFixed(1)} ${by.toFixed(1)}`
     currentX = bx
     currentY = by
-    currentR = Math.hypot(currentX - cx, currentY - cy)
 
-    // Second run: continue along bend angle or return toward radial
-    if (currentR < maxR) {
-      const run2Len = R * (0.15 + prng() * 0.35)
-      // 50% bend back to radial
-      const shouldTurnRadial = prng() > 0.45
-      const nextAngle = shouldTurnRadial ? Math.atan2(currentY - cy, currentX - cx) : bendAngle
-      const x3 = currentX + run2Len * Math.cos(nextAngle)
-      const y3 = currentY + run2Len * Math.sin(nextAngle)
+    // Third segment: fan outward toward stage edges
+    const outwardAngle = Math.atan2(currentY - cy, currentX - cx)
+    const run3Len = R * (0.35 + prng() * 0.8)
+    const x3 = currentX + run3Len * Math.cos(outwardAngle)
+    const y3 = currentY + run3Len * Math.sin(outwardAngle)
 
-      pathD += ` L ${x3.toFixed(1)} ${y3.toFixed(1)}`
-      currentX = x3
-      currentY = y3
-      currentR = Math.hypot(currentX - cx, currentY - cy)
+    pathD += ` L ${x3.toFixed(1)} ${y3.toFixed(1)}`
+    currentX = x3
+    currentY = y3
 
-      // Optional third run if still well within maxR
-      if (currentR < maxR - R * 0.3 && prng() > 0.6) {
-        const run3Len = R * (0.15 + prng() * 0.4)
-        const radAngle = Math.atan2(currentY - cy, currentX - cx)
-        const x4 = currentX + run3Len * Math.cos(radAngle)
-        const y4 = currentY + run3Len * Math.sin(radAngle)
-        pathD += ` L ${x4.toFixed(1)} ${y4.toFixed(1)}`
-        currentX = x4
-        currentY = y4
-      }
+    // Optional 4th branch run for long traces
+    const distToCenter = Math.hypot(currentX - cx, currentY - cy)
+    if (distToCenter < maxDiagonal && prng() > 0.5) {
+      const bend2Sign = prng() > 0.5 ? 1 : -1
+      const bend2Angle = outwardAngle + (bend2Sign * Math.PI) / 4
+      const run4Len = R * (0.25 + prng() * 0.5)
+      const x4 = currentX + run4Len * Math.cos(bend2Angle)
+      const y4 = currentY + run4Len * Math.sin(bend2Angle)
+      pathD += ` L ${x4.toFixed(1)} ${y4.toFixed(1)}`
+      currentX = x4
+      currentY = y4
     }
 
-    // Node at the end
-    const nodeR = 2.0 + prng() * 1.5
-    const twinkle = prng() < 0.1 // 10% twinkle
+    // End node
+    const nodeR = 2.4 + prng() * 1.8 // 2.4 to 4.2px
+    const traceOpacity = 0.55 + prng() * 0.30 // 0.55 to 0.85 (Clearly visible!)
+    const traceWidth = 1.1 + prng() * 0.4 // 1.1 to 1.5px
+    const duration = 2.6 + prng() * 3.4 // 2.5s to 6.0s
+    const delay = prng() * 4.5 // 0 to 4.5s
+    const reverse = prng() > 0.75 // 25% inward, 75% outward
+    const nodeDuration = 2.0 + prng() * 2.0
+    const nodeDelay = prng() * 3.0
 
-    // Opacity tier: 0 = 0.10 (55%), 1 = 0.18 (30%), 2 = 0.30 (15%)
-    const tierRand = prng()
-    const tier: 0 | 1 | 2 = tierRand < 0.55 ? 0 : tierRand < 0.85 ? 1 : 2
+    // Dash array for pulses: short bright dash "40 400"
+    const dashLength = Math.round(35 + prng() * 25) // 35 to 60px
+    const dashGap = Math.round(400 + prng() * 200)
 
     traces.push({
+      id: i,
       d: pathD,
+      opacity: parseFloat(traceOpacity.toFixed(2)),
+      width: parseFloat(traceWidth.toFixed(2)),
+      duration: parseFloat(duration.toFixed(2)),
+      delay: parseFloat(delay.toFixed(2)),
+      reverse,
+      dashArray: `${dashLength} ${dashGap}`,
       endNode: {
         x: parseFloat(currentX.toFixed(1)),
         y: parseFloat(currentY.toFixed(1)),
         r: parseFloat(nodeR.toFixed(1)),
-        twinkle,
+        duration: parseFloat(nodeDuration.toFixed(2)),
+        delay: parseFloat(nodeDelay.toFixed(2)),
       },
-      tier,
-      isPulseCandidate: currentR > R * 1.6,
     })
   }
 
-  // Combine paths by tier for cheap rendering (only 3 path elements total!)
-  const tier0 = traces.filter((t) => t.tier === 0).map((t) => t.d).join(" ")
-  const tier1 = traces.filter((t) => t.tier === 1).map((t) => t.d).join(" ")
-  const tier2 = traces.filter((t) => t.tier === 2).map((t) => t.d).join(" ")
-
-  const allNodes = traces.map((t) => t.endNode)
-
-  // Choose pulse traces
-  const eligible = traces
-    .map((t, idx) => ({ t, idx }))
-    .filter((item) => item.t.isPulseCandidate)
-
-  // Shuffle and pick pulseCount
-  const shuffled = [...eligible].sort(() => prng() - 0.5)
-  const chosen = shuffled.slice(0, Math.min(pulseCount, shuffled.length))
-
-  const pulseTraces = chosen.map(({ t, idx }, pIndex) => ({
-    d: t.d,
-    nodeIndex: idx,
-    duration: parseFloat((3.2 + prng() * 2.8).toFixed(2)), // 3.2 - 6.0s
-    delay: parseFloat(((pIndex * (14 / pulseCount)) + prng() * 1.2).toFixed(2)),
-  }))
-
   // ---------------------------------------------------------------------------
-  // TICK RING AT 1.16R
+  // SECOND SEGMENTED TECH RING WITH TICK MARKS (just outside at 1.12R)
   // ---------------------------------------------------------------------------
-  const tickR = R * 1.16
+  const tickR = R * 1.12
   const tickSegments: string[] = []
-  for (let deg = 0; deg < 360; deg += 2) {
-    const is30 = deg % 30 === 0
-    const is10 = deg % 10 === 0
-    const tickLen = is30 ? R * 0.035 : is10 ? R * 0.024 : R * 0.012
-
+  for (let deg = 0; deg < 360; deg += 3) {
+    const isMajor = deg % 15 === 0
+    const len = isMajor ? R * 0.035 : R * 0.016
     const rad = (deg * Math.PI) / 180
     const cos = Math.cos(rad)
     const sin = Math.sin(rad)
-
     const x1 = cx + tickR * cos
     const y1 = cy + tickR * sin
-    const x2 = cx + (tickR + tickLen) * cos
-    const y2 = cy + (tickR + tickLen) * sin
-
+    const x2 = cx + (tickR + len) * cos
+    const y2 = cy + (tickR + len) * sin
     tickSegments.push(`M ${x1.toFixed(1)} ${y1.toFixed(1)} L ${x2.toFixed(1)} ${y2.toFixed(1)}`)
   }
-  const tickPath = tickSegments.join(" ")
+  const tickRingPath = tickSegments.join(" ")
 
-  // ---------------------------------------------------------------------------
-  // SEGMENTED RING AT 1.10R (9 to 12 dashed arcs of unequal length with small gaps)
-  // ---------------------------------------------------------------------------
-  const segR = R * 1.10
-  const segArcCount = 11
+  // Segmented dashed arc path
+  const segR = R * 1.09
+  const arcSpans = [28, 36, 18, 42, 24, 30, 26, 38, 22, 34]
   let currentAngle = 0
-  const segPaths: string[] = []
-  const segmentedRingNodes: Array<{ x: number; y: number }> = []
-
-  // Total angular span = 360 deg
-  const arcSpans = [24, 32, 18, 38, 22, 30, 26, 34, 20, 36, 28] // sums to 308 deg, remaining ~52 deg for gaps
-  const gapSpan = 52 / segArcCount // ~4.7 deg gap
-
-  for (let i = 0; i < segArcCount; i++) {
-    const span = arcSpans[i % arcSpans.length]
-    const startDeg = currentAngle
-    const endDeg = startDeg + span
-
-    const startRad = (startDeg * Math.PI) / 180
-    const endRad = (endDeg * Math.PI) / 180
-
+  const segArcs: string[] = []
+  for (let i = 0; i < arcSpans.length; i++) {
+    const span = arcSpans[i]
+    const startRad = (currentAngle * Math.PI) / 180
+    const endRad = ((currentAngle + span) * Math.PI) / 180
     const sx = cx + segR * Math.cos(startRad)
     const sy = cy + segR * Math.sin(startRad)
     const ex = cx + segR * Math.cos(endRad)
     const ey = cy + segR * Math.sin(endRad)
-
-    const largeArc = span > 180 ? 1 : 0
-    segPaths.push(`M ${sx.toFixed(1)} ${sy.toFixed(1)} A ${segR.toFixed(1)} ${segR.toFixed(1)} 0 ${largeArc} 1 ${ex.toFixed(1)} ${ey.toFixed(1)}`)
-
-    // Gap midpoint node
-    const gapMidRad = ((endDeg + gapSpan / 2) * Math.PI) / 180
-    segmentedRingNodes.push({
-      x: parseFloat((cx + segR * Math.cos(gapMidRad)).toFixed(1)),
-      y: parseFloat((cy + segR * Math.sin(gapMidRad)).toFixed(1)),
-    })
-
-    currentAngle = endDeg + gapSpan
+    segArcs.push(`M ${sx.toFixed(1)} ${sy.toFixed(1)} A ${segR.toFixed(1)} ${segR.toFixed(1)} 0 0 1 ${ex.toFixed(1)} ${ey.toFixed(1)}`)
+    currentAngle += span + 8 // 8 deg gap
   }
-  const segmentedRingPath = segPaths.join(" ")
+  const segmentedRingPath = segArcs.join(" ")
 
   return {
-    tierPaths: [tier0, tier1, tier2],
-    allNodes,
-    pulseTraces,
-    tickPath,
+    traces,
+    tickRingPath,
     segmentedRingPath,
-    segmentedRingNodes,
-    R,
     cx,
     cy,
+    R,
   }
 }
