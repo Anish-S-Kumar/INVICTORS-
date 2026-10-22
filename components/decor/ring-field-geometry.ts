@@ -1,7 +1,7 @@
 /**
- * PCB Circuit Geometry Generator (v8 Enhanced)
- * Generates rich, glowing gold circuit traces with right-angle and 45-degree bends,
- * end-node dots, and data pulse parameters.
+ * PCB Circuit Geometry Generator (v8 - Reference Image Matched)
+ * Matches the reference image's warm golden PCB traces, orthogonal/45-degree bends,
+ * clean solder nodes, and SLOW, elegant light pulses.
  */
 
 export interface CircuitTrace {
@@ -31,7 +31,7 @@ export interface CircuitFieldGeometry {
   R: number
 }
 
-// Mulberry32 deterministic PRNG
+// Deterministic PRNG
 export function createPrng(seed = 0x9e3779b9) {
   let s = seed >>> 0
   return function next(): number {
@@ -57,19 +57,19 @@ export function generateCircuitFieldGeometry({
   height: number
   isMobile?: boolean
 }): CircuitFieldGeometry {
-  const prng = createPrng(0x85ebca6b + Math.round(R * 10))
+  const prng = createPrng(0x5bd1e995 + Math.round(R * 10))
 
-  // Ray count: ~68 on laptop, 38 on mobile
-  const N = isMobile ? 38 : Math.max(54, Math.min(84, Math.round((2 * Math.PI * R) / 22)))
+  // Balanced density of PCB tracks
+  const N = isMobile ? 36 : Math.max(52, Math.min(80, Math.round((2 * Math.PI * R) / 23)))
   const step = (2 * Math.PI) / N
   const traces: CircuitTrace[] = []
 
-  const r0 = R * 1.045 // Starts directly at outer edge of golden ring
-  const maxDiagonal = Math.hypot(width, height) / 2 + 60
+  const r0 = R * 1.045
+  const maxDiagonal = Math.hypot(width, height) / 2 + 50
 
   for (let i = 0; i < N; i++) {
-    // Jitter angle slightly
-    const jitter = (prng() * 0.5 - 0.25) * step
+    // Symmetrical, organized angular distribution
+    const jitter = (prng() * 0.4 - 0.2) * step
     const angle = i * step + jitter
     const cosA = Math.cos(angle)
     const sinA = Math.sin(angle)
@@ -77,21 +77,21 @@ export function generateCircuitFieldGeometry({
     const x0 = cx + r0 * cosA
     const y0 = cy + r0 * sinA
 
-    // Length of first radial run
-    const run1Len = R * (0.18 + prng() * 0.35)
+    // Run 1: initial radial stem
+    const run1Len = R * (0.15 + prng() * 0.28)
     let currentX = x0 + run1Len * cosA
     let currentY = y0 + run1Len * sinA
 
     let pathD = `M ${x0.toFixed(1)} ${y0.toFixed(1)} L ${currentX.toFixed(1)} ${currentY.toFixed(1)}`
 
-    // Decide bend type: 90-degree right angle (PCB style) or 45-degree
-    const useRightAngle = prng() > 0.45
+    // Clean PCB routing: 45° or 90° bends
+    const use45 = prng() > 0.4
     const bendSign = prng() > 0.5 ? 1 : -1
-    const bendAngle = useRightAngle
-      ? angle + (bendSign * Math.PI) / 2
-      : angle + (bendSign * Math.PI) / 4
+    const bendAngle = use45
+      ? angle + (bendSign * Math.PI) / 4
+      : angle + (bendSign * Math.PI) / 2
 
-    const bendLen = R * (0.12 + prng() * 0.25)
+    const bendLen = R * (0.12 + prng() * 0.22)
     const bx = currentX + bendLen * Math.cos(bendAngle)
     const by = currentY + bendLen * Math.sin(bendAngle)
 
@@ -99,9 +99,9 @@ export function generateCircuitFieldGeometry({
     currentX = bx
     currentY = by
 
-    // Third segment: fan outward toward stage edges
+    // Run 2: outward run parallel to main axes or diagonal
     const outwardAngle = Math.atan2(currentY - cy, currentX - cx)
-    const run3Len = R * (0.35 + prng() * 0.8)
+    const run3Len = R * (0.35 + prng() * 0.75)
     const x3 = currentX + run3Len * Math.cos(outwardAngle)
     const y3 = currentY + run3Len * Math.sin(outwardAngle)
 
@@ -109,12 +109,12 @@ export function generateCircuitFieldGeometry({
     currentX = x3
     currentY = y3
 
-    // Optional 4th branch run for long traces
+    // Optional 3rd segment reaching out
     const distToCenter = Math.hypot(currentX - cx, currentY - cy)
-    if (distToCenter < maxDiagonal && prng() > 0.5) {
+    if (distToCenter < maxDiagonal && prng() > 0.45) {
       const bend2Sign = prng() > 0.5 ? 1 : -1
       const bend2Angle = outwardAngle + (bend2Sign * Math.PI) / 4
-      const run4Len = R * (0.25 + prng() * 0.5)
+      const run4Len = R * (0.22 + prng() * 0.45)
       const x4 = currentX + run4Len * Math.cos(bend2Angle)
       const y4 = currentY + run4Len * Math.sin(bend2Angle)
       pathD += ` L ${x4.toFixed(1)} ${y4.toFixed(1)}`
@@ -122,19 +122,21 @@ export function generateCircuitFieldGeometry({
       currentY = y4
     }
 
-    // End node
-    const nodeR = 2.4 + prng() * 1.8 // 2.4 to 4.2px
-    const traceOpacity = 0.55 + prng() * 0.30 // 0.55 to 0.85 (Clearly visible!)
-    const traceWidth = 1.1 + prng() * 0.4 // 1.1 to 1.5px
-    const duration = 2.6 + prng() * 3.4 // 2.5s to 6.0s
-    const delay = prng() * 4.5 // 0 to 4.5s
-    const reverse = prng() > 0.75 // 25% inward, 75% outward
-    const nodeDuration = 2.0 + prng() * 2.0
-    const nodeDelay = prng() * 3.0
+    // End node dot
+    const nodeR = 2.4 + prng() * 1.5 // 2.4 to 3.9px
+    const traceOpacity = 0.55 + prng() * 0.30 // Warm, distinct visibility (0.55 - 0.85)
+    const traceWidth = 1.15 + prng() * 0.35 // 1.15 to 1.5px
 
-    // Dash array for pulses: short bright dash "40 400"
-    const dashLength = Math.round(35 + prng() * 25) // 35 to 60px
-    const dashGap = Math.round(400 + prng() * 200)
+    // SLOW, ELEGANT PULSES (9.0s to 18.0s) as requested!
+    const duration = 9.5 + prng() * 8.5 // 9.5s to 18.0s (calm and slow)
+    const delay = prng() * 9.0 // spread across 0 to 9s
+    const reverse = prng() > 0.8 // 20% inward, 80% outward
+    const nodeDuration = 3.5 + prng() * 2.5
+    const nodeDelay = prng() * 4.0
+
+    // Short bright dash
+    const dashLength = Math.round(28 + prng() * 18) // 28 to 46px
+    const dashGap = 650
 
     traces.push({
       id: i,
@@ -156,13 +158,13 @@ export function generateCircuitFieldGeometry({
   }
 
   // ---------------------------------------------------------------------------
-  // SECOND SEGMENTED TECH RING WITH TICK MARKS (just outside at 1.12R)
+  // SECOND SEGMENTED TECH RING WITH TICK MARKS (at 1.12R, exactly like reference)
   // ---------------------------------------------------------------------------
   const tickR = R * 1.12
   const tickSegments: string[] = []
   for (let deg = 0; deg < 360; deg += 3) {
     const isMajor = deg % 15 === 0
-    const len = isMajor ? R * 0.035 : R * 0.016
+    const len = isMajor ? R * 0.038 : R * 0.016
     const rad = (deg * Math.PI) / 180
     const cos = Math.cos(rad)
     const sin = Math.sin(rad)
@@ -175,8 +177,8 @@ export function generateCircuitFieldGeometry({
   const tickRingPath = tickSegments.join(" ")
 
   // Segmented dashed arc path
-  const segR = R * 1.09
-  const arcSpans = [28, 36, 18, 42, 24, 30, 26, 38, 22, 34]
+  const segR = R * 1.095
+  const arcSpans = [28, 38, 16, 44, 22, 32, 24, 40, 20, 36]
   let currentAngle = 0
   const segArcs: string[] = []
   for (let i = 0; i < arcSpans.length; i++) {
@@ -188,7 +190,7 @@ export function generateCircuitFieldGeometry({
     const ex = cx + segR * Math.cos(endRad)
     const ey = cy + segR * Math.sin(endRad)
     segArcs.push(`M ${sx.toFixed(1)} ${sy.toFixed(1)} A ${segR.toFixed(1)} ${segR.toFixed(1)} 0 0 1 ${ex.toFixed(1)} ${ey.toFixed(1)}`)
-    currentAngle += span + 8 // 8 deg gap
+    currentAngle += span + 7
   }
   const segmentedRingPath = segArcs.join(" ")
 
