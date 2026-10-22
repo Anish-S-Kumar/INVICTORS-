@@ -5,6 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import { RingField } from "@/components/decor/RingField"
 import { ChevronRight, Home } from "lucide-react"
 
 interface PageShellProps {
@@ -24,8 +25,13 @@ export function PageShell({
 }: PageShellProps) {
   return (
     <div id="main-content" className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
+      {/* Subtle Lighter Subpage RingField Background */}
+      <RingField isSubpage={true} className="fixed inset-0 z-0 opacity-75 pointer-events-none" />
+
       {/* Header with back button to dashboard */}
-      <Header showBack={true} backHref="/" backLabel="Dashboard" />
+      <div className="relative z-10">
+        <Header showBack={true} backHref="/" backLabel="Dashboard" />
+      </div>
 
       {/* Main Content with Entrance Animation */}
       <motion.main
@@ -33,7 +39,7 @@ export function PageShell({
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.98 }}
         transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12"
+        className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 relative z-10"
       >
         {/* Breadcrumb Navigation */}
         <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-display tracking-widest text-silver-300/60 mb-6">

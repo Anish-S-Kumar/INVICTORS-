@@ -367,3 +367,143 @@ body {
   filter: none !important;
   backdrop-filter: none !important;
 }
+
+/* ========================================================================== */
+/* v8 RingField Animations & Keyframes                                        */
+/* ========================================================================== */
+
+@keyframes ringCometRotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes ringRotateCCW {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(-360deg);
+  }
+}
+
+@keyframes ringScannerRotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes ringHaloBreathe {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes flareBreathe {
+  0%, 100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes pulseTravel {
+  0% {
+    stroke-dashoffset: 7;
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.95;
+  }
+  88% {
+    opacity: 0.95;
+  }
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+
+@keyframes nodeTwinkleAnim {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes radarPing {
+  0% {
+    r: calc(var(--R, 280px) * 1.04);
+    opacity: 0.6;
+  }
+  100% {
+    r: calc(var(--R, 280px) * 2.2);
+    opacity: 0;
+  }
+}
+
+.animate-ring-comet {
+  animation: ringCometRotate var(--comet-speed, 14s) linear infinite;
+  will-change: transform;
+  contain: strict;
+}
+
+.animate-ring-ccw {
+  animation: ringRotateCCW 90s linear infinite;
+  will-change: transform;
+  contain: strict;
+}
+
+.animate-ring-scanner {
+  animation: ringScannerRotate 22s linear infinite;
+  will-change: transform;
+  contain: strict;
+}
+
+.animate-ring-halo {
+  animation: ringHaloBreathe 6s ease-in-out infinite;
+}
+
+.animate-flare-breathe {
+  animation: flareBreathe 5s ease-in-out infinite;
+}
+
+.animate-pulse-run {
+  animation: pulseTravel var(--pulse-dur, 4.5s) ease-in-out infinite var(--pulse-delay, 0s);
+}
+
+.animate-node-twinkle {
+  animation: nodeTwinkleAnim var(--twinkle-dur, 6s) ease-in-out infinite var(--twinkle-delay, 0s);
+}
+
+/* Pause animations when tab is hidden or when data-paused="true" or data-busy="true" */
+[data-paused="true"] .ring-field-anim,
+[data-busy="true"] .animate-pulse-run,
+[data-busy="true"] .animate-node-twinkle {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-ring-comet,
+  .animate-ring-ccw,
+  .animate-ring-scanner,
+  .animate-pulse-run,
+  .animate-node-twinkle {
+    animation: none !important;
+  }
+  .animate-ring-halo {
+    animation: ringHaloBreathe 12s ease-in-out infinite;
+  }
+}

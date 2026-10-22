@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowRight, ChevronDown } from "lucide-react"
 import { NAVIGATION_CARDS, CLUB_METADATA } from "@/lib/content"
 import { smoothDamp } from "@/lib/smooth-damp"
+import { updateDialAnchor } from "@/lib/dial-anchor"
 
 interface WorksWheelProps {
   items?: typeof NAVIGATION_CARDS
@@ -36,6 +37,7 @@ export function WorksWheel({
   const containerRef = useRef<HTMLDivElement>(null)
   const navIndexRef = useRef<HTMLDivElement>(null)
   const dialSvgRef = useRef<SVGSVGElement>(null)
+  const outerRimRef = useRef<SVGCircleElement>(null)
 
   // Physics & Animation Refs
   const currentTurnRef = useRef<number>(0)
@@ -95,11 +97,38 @@ export function WorksWheel({
     return () => window.removeEventListener("resize", updateSize)
   }, [])
 
-  // A1. Dial Outer Diameter D Formula:
-  // D = min(stageHeight - 72px, 0.62 x stageWidth, 980px). Pixel-snapped with Math.round.
+  // A1. Dial Outer Diameter D Formula (v8):
+  // D = min( (stageHeight - 24) / 1.17, 0.62 x stageWidth, 980 ). Pixel-snapped with Math.round.
   const stageW = stageDimensions.width
   const stageH = stageDimensions.height
-  const dialDiameter = Math.round(Math.min(stageH - 72, 0.62 * stageW, 980))
+  const dialDiameter = Math.round(Math.min((stageH - 24) / 1.17, 0.62 * stageW, 980))
+
+  // Publish Dial Anchor for RingField concentric lock
+  useLayoutEffect(() => {
+    const publishAnchor = () => {
+      if (!outerRimRef.current || !containerRef.current) return
+      const rimRect = outerRimRef.current.getBoundingClientRect()
+      const stageRect = containerRef.current.getBoundingClientRect()
+
+      const cx = Math.round((rimRect.left - stageRect.left + rimRect.width / 2) * 2) / 2
+      const cy = Math.round((rimRect.top - stageRect.top + rimRect.height / 2) * 2) / 2
+      const R = Math.round((rimRect.width / 2) * 2) / 2
+
+      updateDialAnchor(
+        {
+          anchor: { cx, cy, R },
+        },
+        containerRef.current
+      )
+    }
+
+    publishAnchor()
+    const ro = new ResizeObserver(publishAnchor)
+    if (containerRef.current) ro.observe(containerRef.current)
+    if (outerRimRef.current) ro.observe(outerRimRef.current)
+
+    return () => ro.disconnect()
+  }, [dialDiameter])
 
   // ---------------------------------------------------------------------------
   // MAIN ANIMATION LOOP (Critically Damped SmoothDamp with <=4ms scripting budget)
@@ -699,20 +728,10 @@ export function WorksWheel({
             </filter>
           </defs>
 
-          {/* 1. OUTER ROTATING DOTTED RING (radius 496, slow rotation) */}
+          {/* 2. OUTER BEZEL RIM (radius 482) - Measured as Anchor R */}
           <circle
-            cx={CX}
-            cy={CY}
-            r="496"
-            stroke="rgba(212, 162, 76, 0.22)"
-            strokeWidth="1.2"
-            strokeDasharray="4 6"
-            className={prefersReducedMotion ? "" : "animate-spin-slow"}
-            style={{ transformOrigin: "500px 500px" }}
-          />
-
-          {/* 2. OUTER BEZEL RIM (radius 482) */}
-          <circle
+            ref={outerRimRef}
+            id="dial-outer-chrome-rim"
             cx={CX}
             cy={CY}
             r="482"
@@ -742,8 +761,7 @@ export function WorksWheel({
             )
           })}
 
-          {/* 4. 4 CROSSHAIR NODES (12, 3, 6, 9 o'clock) */}
-          {/* 3 & 9 o'clock nodes sit exactly on segment boundaries; 12 & 6 o'clock centered on segments 01 and 04 */}
+          {/* 4. 4 CROSSHAIR NODES (12, 3, 6, 9 o'clock) with hairlines extended to 1.16R (559px) */}
           {[0, 90, 180, 270].map((deg) => {
             const rad = (deg * Math.PI) / 180
             const nodeR = 496
@@ -754,8 +772,8 @@ export function WorksWheel({
                 <line
                   x1={CX + 478 * Math.cos(rad)}
                   y1={CY + 478 * Math.sin(rad)}
-                  x2={CX + 508 * Math.cos(rad)}
-                  y2={CY + 508 * Math.sin(rad)}
+                  x2={CX + 559 * Math.cos(rad)}
+                  y2={CY + 559 * Math.sin(rad)}
                   stroke="#d4a24c"
                   strokeWidth="1.2"
                   opacity="0.7"

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useRef, useCallback } from "react"
+import React, { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { Volume2, VolumeX, ArrowRight, CornerRightDown } from "lucide-react"
@@ -14,6 +14,7 @@ import {
   isDialSoundMuted,
 } from "@/lib/dial-sound"
 import { smoothDamp } from "@/lib/smooth-damp"
+import { updateDialAnchor } from "@/lib/dial-anchor"
 
 const DIAL_ITEMS = [
   { id: "overview", number: "01", title: "Club Overview", href: "/overview", iconName: "Compass" },
@@ -32,6 +33,8 @@ export function MobileRotaryDial() {
   const [hasInteracted, setHasInteracted] = useState<boolean>(false)
   const [dimensions, setDimensions] = useState({ width: 390, height: 750, isLandscape: false })
 
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const logoRef = useRef<HTMLDivElement | null>(null)
   const zoneBRef = useRef<HTMLDivElement | null>(null)
   const dialSvgRef = useRef<SVGSVGElement | null>(null)
   const labelsGroupRef = useRef<SVGGElement | null>(null)
@@ -78,6 +81,53 @@ export function MobileRotaryDial() {
   const isShortScreen = dimensions.height < 640 || dimensions.isLandscape
   const maxHFactor = isShortScreen ? 0.25 : 0.30
   const R = Math.round(Math.min(0.48 * dimensions.width, maxHFactor * dimensions.height, 185))
+
+  // Measure and publish mobile anchors (Anchor L for logo, Anchor D for dial)
+  useLayoutEffect(() => {
+    const publishMobileAnchors = () => {
+      if (!containerRef.current) return
+      const stageRect = containerRef.current.getBoundingClientRect()
+
+      // Logo Anchor L
+      let anchorL = { cx: stageRect.width / 2, cy: stageRect.height * 0.35, R: 90 }
+      if (logoRef.current) {
+        const lRect = logoRef.current.getBoundingClientRect()
+        anchorL = {
+          cx: Math.round((lRect.left - stageRect.left + lRect.width / 2) * 2) / 2,
+          cy: Math.round((lRect.top - stageRect.top + lRect.height / 2) * 2) / 2,
+          R: Math.round((lRect.width / 2) * 2) / 2,
+        }
+      }
+
+      // Dial Anchor D
+      let anchorD = { cx: stageRect.width / 2, cy: stageRect.height, R }
+      if (zoneBRef.current) {
+        const zRect = zoneBRef.current.getBoundingClientRect()
+        anchorD = {
+          cx: Math.round((zRect.left - stageRect.left + zRect.width / 2) * 2) / 2,
+          cy: Math.round((zRect.bottom - stageRect.top) * 2) / 2,
+          R,
+        }
+      }
+
+      updateDialAnchor(
+        {
+          anchor: anchorD,
+          anchorL,
+          anchorD,
+        },
+        containerRef.current
+      )
+    }
+
+    publishMobileAnchors()
+    const ro = new ResizeObserver(publishMobileAnchors)
+    if (containerRef.current) ro.observe(containerRef.current)
+    if (logoRef.current) ro.observe(logoRef.current)
+    if (zoneBRef.current) ro.observe(zoneBRef.current)
+
+    return () => ro.disconnect()
+  }, [R, dimensions])
 
   // ---------------------------------------------------------------------------
   // MAIN PHYSICS LOOP (SmoothDamp snapping & continuous rotation)
@@ -384,6 +434,7 @@ export function MobileRotaryDial() {
 
   return (
     <div
+      ref={containerRef}
       role="listbox"
       aria-label="INVICTORS Navigation Rotary Dial"
       aria-activedescendant={`dial-item-${selectedIndex}`}
@@ -415,6 +466,7 @@ export function MobileRotaryDial() {
       >
         {/* INVICTORS Logo Emblem - Enlarged for crisp text readability inside symbol */}
         <div
+          ref={logoRef}
           data-debug="logo"
           className="relative rounded-full overflow-hidden shadow-[0_0_36px_rgba(212,162,76,0.5)] border-2 border-amber-400/80 shrink-0"
           style={{
