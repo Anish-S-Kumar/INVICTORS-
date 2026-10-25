@@ -20,6 +20,7 @@ interface SocialConfig {
 
 export function FloatingSocials() {
   const [isPaused, setIsPaused] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null)
   const isLongPressRef = useRef(false)
 
@@ -145,7 +146,12 @@ export function FloatingSocials() {
   ]
 
   return (
-    <div className="smoke-socials-wrapper" aria-label="Social media channels">
+    <div
+      className="smoke-socials-wrapper"
+      aria-label="Social media channels"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <style jsx>{`
         /* =========================================================================
            CONTAINER SIZING:
@@ -157,11 +163,18 @@ export function FloatingSocials() {
           height: 38px;
           overflow-x: hidden;
           overflow-y: visible;
-          pointer-events: none;
+          pointer-events: auto; /* Allow hovering anywhere in the space */
           user-select: none;
           display: flex;
           align-items: center;
           margin: 2px 0;
+        }
+
+        /* Desktop hover-to-pause: When cursor is placed anywhere on the strip or icons, freeze motion */
+        @media (hover: hover) and (pointer: fine) {
+          .smoke-socials-wrapper:hover .smoke-drift-item {
+            animation-play-state: paused !important;
+          }
         }
 
         @media (max-width: 768px) {
@@ -358,7 +371,7 @@ export function FloatingSocials() {
           style={{
             animationDuration: `${item.duration}s`,
             animationDelay: `${item.delay}s`,
-            animationPlayState: isPaused ? "paused" : "running",
+            animationPlayState: isPaused || isHovered ? "paused" : "running",
           }}
         >
           <a
