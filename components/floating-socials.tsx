@@ -148,68 +148,67 @@ export function FloatingSocials() {
       <style jsx>{`
         /* =========================================================================
            CONTAINER SIZING:
-           Vertical room for 15-25px wave + glows without vertical clipping.
-           Horizontal overflow is hidden so icons drift across screen edges.
+           Sleek height matching the original layout with no overflow clipping
            ========================================================================= */
         .smoke-socials-wrapper {
           position: relative;
           width: 100%;
-          height: 96px; /* Desktop height */
+          height: 38px;
           overflow-x: hidden;
           overflow-y: visible;
           pointer-events: none;
           user-select: none;
           display: flex;
           align-items: center;
-          margin: 4px 0;
+          margin: 2px 0;
         }
 
         @media (max-width: 768px) {
           .smoke-socials-wrapper {
-            height: 118px; /* Extra height on mobile for 80-90px icons + waves */
-            margin: 6px 0;
+            height: 36px;
+            margin: 2px 0;
           }
         }
 
         /* =========================================================================
            SMOKY DRIFT KEYFRAMES:
-           - Enters left: blur(12px), opacity: 0
+           - Enters left: blur(10px), opacity: 0
            - Mid screen: blur(0px), opacity: 1, sharp, full glow
-           - Waves: 15px - 24px vertical drift with subtle 2deg - 4deg rotation
-           - Exits right: blur(14px), opacity: 0, dissolving smoke
+           - Gentle waves: 8px to 10px drift with subtle rotation
+           - Exits right: blur(12px), opacity: 0, dissolving smoke
            ========================================================================= */
         @keyframes smokeDrift {
           0% {
-            transform: translate3d(-120px, 0px, 0) rotate(-3deg) scale(0.85);
+            transform: translate3d(-60px, 0px, 0) rotate(-2deg) scale(0.9);
             opacity: 0;
-            filter: blur(12px);
+            filter: blur(10px);
           }
-          12% {
+          10% {
             opacity: 0.95;
-            filter: blur(2px);
+            filter: blur(1.5px);
           }
           25% {
-            transform: translate3d(calc(25vw - 40px), -18px, 0) rotate(3deg) scale(1.02);
+            transform: translate3d(calc(25vw - 16px), -8px, 0) rotate(2deg) scale(1.02);
             filter: blur(0px);
           }
           50% {
-            transform: translate3d(calc(50vw - 40px), 16px, 0) rotate(-2deg) scale(0.98);
+            transform: translate3d(calc(50vw - 16px), 8px, 0) rotate(-1.5deg) scale(0.98);
             opacity: 1;
             filter: blur(0px);
           }
           75% {
-            transform: translate3d(calc(75vw - 40px), -14px, 0) rotate(4deg) scale(1.01);
+            transform: translate3d(calc(75vw - 16px), -6px, 0) rotate(2deg) scale(1.01);
             opacity: 0.95;
-            filter: blur(1px);
+            filter: blur(0.5px);
           }
-          88% {
+          90% {
             opacity: 0.65;
-            filter: blur(6px);
+            filter: blur(4px);
           }
           100% {
-            transform: translate3d(calc(100vw + 100px), 6px, 0) rotate(-3deg) scale(0.88);
+            transform: translate3d(calc(100vw + 60px), 3px, 0) rotate(-2deg) scale(0.9);
             opacity: 0;
-            filter: blur(14px);
+            filter: blur(12px);
           }
         }
 
@@ -237,10 +236,9 @@ export function FloatingSocials() {
         }
 
         /* =========================================================================
-           ICON STYLES & SIZING:
-           Desktop: ~64px x 64px
-           Mobile (<768px): 84px x 84px
-           Min touch target: 48px+ guaranteed
+           ICON STYLES & SIZING (Original compact size restored):
+           Desktop: 32px x 32px (w-8 h-8)
+           Mobile (<768px): 28px x 28px (w-7 h-7)
            ========================================================================= */
         .smoke-link-btn {
           position: relative;
@@ -248,51 +246,49 @@ export function FloatingSocials() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border-radius: 24px;
-          border: 1.5px solid rgba(255, 255, 255, 0.35);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          border-radius: 9999px;
+          border: 1px solid rgba(255, 255, 255, 0.35);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           cursor: pointer;
-          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-                      border-color 0.25s ease;
+          transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                      border-color 0.2s ease;
           touch-action: manipulation;
           -webkit-tap-highlight-color: transparent;
 
-          /* Desktop dimensions: 64px */
-          width: 64px;
-          height: 64px;
+          /* Original desktop dimensions: 32px */
+          width: 32px;
+          height: 32px;
         }
 
         .smoke-link-btn :global(.social-svg) {
-          width: 30px;
-          height: 30px;
+          width: 16px;
+          height: 16px;
           color: #ffffff;
-          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
         }
 
-        /* Mobile dimensions: 84px (>80px mobile target) */
+        /* Original mobile dimensions: 28px */
         @media (max-width: 768px) {
           .smoke-link-btn {
-            width: 84px;
-            height: 84px;
-            border-radius: 28px;
-            border-width: 2px;
+            width: 28px;
+            height: 28px;
           }
 
           .smoke-link-btn :global(.social-svg) {
-            width: 40px;
-            height: 40px;
+            width: 14px;
+            height: 14px;
           }
         }
 
         /* Hover & Tap scale */
         .smoke-link-btn:hover {
-          transform: scale(1.12);
+          transform: scale(1.22);
           border-color: rgba(255, 255, 255, 0.85);
         }
 
         .smoke-link-btn:active {
-          transform: scale(0.94);
+          transform: scale(0.92);
         }
 
         /* =========================================================================
@@ -302,10 +298,10 @@ export function FloatingSocials() {
         .smoke-link-btn::before {
           content: "";
           position: absolute;
-          inset: -14px -32px -14px -48px;
+          inset: -6px -16px -6px -22px;
           border-radius: 50%;
           background: var(--trail-gradient);
-          filter: blur(16px);
+          filter: blur(10px);
           opacity: 0.7;
           pointer-events: none;
           z-index: -1;
@@ -314,8 +310,8 @@ export function FloatingSocials() {
 
         @media (max-width: 768px) {
           .smoke-link-btn::before {
-            inset: -18px -42px -18px -60px;
-            filter: blur(22px);
+            inset: -5px -14px -5px -18px;
+            filter: blur(8px);
           }
         }
 
