@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
+import { FloatingSocials } from "@/components/floating-socials"
 
 interface HeaderProps {
   showBack?: boolean
@@ -47,9 +48,9 @@ export function Header({
   return (
     <header
       data-debug="header"
-      className="sticky top-0 z-40 w-full shrink-0 bg-gradient-to-b from-black/95 via-black/85 to-black/75 backdrop-blur-md transition-all duration-300 pt-[env(safe-area-inset-top,0px)] h-[74px] sm:h-[82px] lg:h-[94px]"
+      className="sticky top-0 z-40 w-full shrink-0 bg-gradient-to-b from-black/95 via-black/85 to-black/75 backdrop-blur-md transition-all duration-300 pt-[env(safe-area-inset-top,0px)]"
     >
-      <div className="w-full h-full max-w-7xl mx-auto grid grid-cols-[auto_1fr_auto] gap-2.5 sm:gap-4 px-3 sm:px-4 lg:px-6 items-center">
+      <div className="w-full h-[74px] sm:h-[82px] lg:h-[94px] max-w-7xl mx-auto grid grid-cols-[auto_1fr_auto] gap-2.5 sm:gap-4 px-3 sm:px-4 lg:px-6 items-center">
         {/* Left: College Logo & Optional Back Button */}
         <div className="flex items-center gap-2 justify-self-start">
           {showBack && (
@@ -139,6 +140,11 @@ export function Header({
       {/* Bottom edge: Fading gold hairline with center crosshair node */}
       <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent flex items-center justify-center pointer-events-none">
         <div className="w-1.5 h-1.5 rotate-45 border border-amber-300 bg-amber-500/80 shadow-[0_0_6px_rgba(212,162,76,0.8)] -translate-y-[0.5px]" />
+      </div>
+
+      {/* Floating Smoky Social Media Strip directly below the header title */}
+      <div className="w-full">
+        <FloatingSocials />
       </div>
     </header>
   )
