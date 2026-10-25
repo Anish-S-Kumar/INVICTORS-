@@ -4,17 +4,17 @@ import React, { useEffect, useState, useRef } from "react"
 
 /**
  * CONFIGURATION & LINKS
- * You can edit URLs, timings, and delays here.
+ * Gold & cyber-amber aesthetic harmonized with the website's dark luxury palette.
  */
 interface SocialConfig {
   id: string
   name: string
   href: string
   icon: React.ReactNode
-  brandGradient: string
+  goldGradient: string
   glowColor: string
   trailGradient: string
-  duration: number // Drift loop duration in seconds (18s - 25s)
+  duration: number // Drift duration in seconds
   delay: number // Stagger start delay in seconds
 }
 
@@ -68,13 +68,14 @@ export function FloatingSocials() {
       id: "instagram",
       name: "Instagram",
       href: "https://www.instagram.com/theinvictors.vvce?vrfl=bTlkaHVkY3MzaTdz",
-      brandGradient:
-        "linear-gradient(135deg, #f9ce34 0%, #ee2a7b 50%, #6228d7 100%)",
-      glowColor: "rgba(238, 42, 123, 0.65)",
+      // Luxurious dark amber-gold radial fill with gleaming golden border & accent
+      goldGradient:
+        "linear-gradient(135deg, rgba(24, 18, 8, 0.92) 0%, rgba(42, 30, 12, 0.95) 50%, rgba(15, 12, 6, 0.96) 100%)",
+      glowColor: "rgba(230, 190, 90, 0.85)",
       trailGradient:
-        "radial-gradient(circle, rgba(238,42,123,0.45) 0%, rgba(98,40,215,0.15) 50%, transparent 75%)",
-      duration: 20, // 20s pass
-      delay: 0, // starts immediately
+        "radial-gradient(circle, rgba(230, 190, 90, 0.45) 0%, rgba(180, 130, 40, 0.18) 50%, transparent 75%)",
+      duration: 20,
+      delay: 0,
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -96,13 +97,13 @@ export function FloatingSocials() {
       id: "linkedin",
       name: "LinkedIn",
       href: "https://linkedin.com/in/invictors-club-423576445",
-      brandGradient:
-        "linear-gradient(135deg, #0077b5 0%, #00a0dc 60%, #004182 100%)",
-      glowColor: "rgba(0, 160, 220, 0.7)",
+      goldGradient:
+        "linear-gradient(135deg, rgba(24, 18, 8, 0.92) 0%, rgba(45, 32, 14, 0.95) 50%, rgba(15, 12, 6, 0.96) 100%)",
+      glowColor: "rgba(240, 205, 110, 0.88)",
       trailGradient:
-        "radial-gradient(circle, rgba(0,160,220,0.5) 0%, rgba(0,65,130,0.18) 55%, transparent 75%)",
-      duration: 24, // 24s pass
-      delay: 7, // starts 7s after
+        "radial-gradient(circle, rgba(240, 205, 110, 0.45) 0%, rgba(190, 140, 45, 0.18) 50%, transparent 75%)",
+      duration: 24,
+      delay: 7,
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -118,13 +119,13 @@ export function FloatingSocials() {
       id: "gmail",
       name: "Gmail",
       href: "mailto:invictorsofficial@gmail.com",
-      brandGradient:
-        "linear-gradient(135deg, #ea4335 0%, #fbbc05 45%, #4285f4 100%)",
-      glowColor: "rgba(234, 67, 53, 0.65)",
+      goldGradient:
+        "linear-gradient(135deg, rgba(24, 18, 8, 0.92) 0%, rgba(45, 32, 14, 0.95) 50%, rgba(15, 12, 6, 0.96) 100%)",
+      glowColor: "rgba(235, 195, 95, 0.85)",
       trailGradient:
-        "radial-gradient(circle, rgba(234,67,53,0.5) 0%, rgba(251,188,5,0.18) 50%, transparent 75%)",
-      duration: 22, // 22s pass
-      delay: 14, // starts 14s after
+        "radial-gradient(circle, rgba(235, 195, 95, 0.45) 0%, rgba(185, 135, 42, 0.18) 50%, transparent 75%)",
+      duration: 22,
+      delay: 14,
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -172,10 +173,10 @@ export function FloatingSocials() {
 
         /* =========================================================================
            SMOKY DRIFT KEYFRAMES:
-           - Enters left: blur(10px), opacity: 0
-           - Mid screen: blur(0px), opacity: 1, sharp, full glow
-           - Gentle waves: 8px to 10px drift with subtle rotation
-           - Exits right: blur(12px), opacity: 0, dissolving smoke
+           - Enters left: blur(10px), opacity: 0, subdued glow
+           - Towards center: sharp (blur 0px), 100% visible, bright pulsing gold glow
+           - Wave: smooth 8px to 10px sinusoidal drift with subtle tilt
+           - Exits right: dissolves out with blur(12px) and opacity 0
            ========================================================================= */
         @keyframes smokeDrift {
           0% {
@@ -192,7 +193,8 @@ export function FloatingSocials() {
             filter: blur(0px);
           }
           50% {
-            transform: translate3d(calc(50vw - 16px), 8px, 0) rotate(-1.5deg) scale(0.98);
+            /* Center of the screen: Peak sharpness & peak gold glow */
+            transform: translate3d(calc(50vw - 16px), 8px, 0) rotate(-1.5deg) scale(1);
             opacity: 1;
             filter: blur(0px);
           }
@@ -212,15 +214,15 @@ export function FloatingSocials() {
           }
         }
 
-        /* Pulsing brand aura glow */
-        @keyframes glowPulse {
+        /* Continuous breathing radiance for the gold aura while visible */
+        @keyframes goldAuraGlow {
           0%, 100% {
-            opacity: 0.75;
+            opacity: 0.7;
             transform: scale(1);
           }
           50% {
             opacity: 1;
-            transform: scale(1.08);
+            transform: scale(1.12);
           }
         }
 
@@ -236,9 +238,11 @@ export function FloatingSocials() {
         }
 
         /* =========================================================================
-           ICON STYLES & SIZING (Original compact size restored):
-           Desktop: 32px x 32px (w-8 h-8)
-           Mobile (<768px): 28px x 28px (w-7 h-7)
+           ICON STYLES & GOLD COLORING:
+           - Pill in deep obsidian/amber glass
+           - Solid 24k gold border: rgba(230, 190, 80, 0.7)
+           - Icon SVG: Pure luminous amber-gold with drop-shadow glow
+           - Desktop: 32px x 32px | Mobile: 28px x 28px
            ========================================================================= */
         .smoke-link-btn {
           position: relative;
@@ -247,28 +251,31 @@ export function FloatingSocials() {
           align-items: center;
           justify-content: center;
           border-radius: 9999px;
-          border: 1px solid rgba(255, 255, 255, 0.35);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          border: 1px solid rgba(230, 190, 80, 0.65);
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           cursor: pointer;
           transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-                      border-color 0.2s ease;
+                      border-color 0.2s ease,
+                      box-shadow 0.2s ease;
           touch-action: manipulation;
           -webkit-tap-highlight-color: transparent;
 
-          /* Original desktop dimensions: 32px */
           width: 32px;
           height: 32px;
         }
 
+        /* Pure golden SVG with bright glow */
         .smoke-link-btn :global(.social-svg) {
           width: 16px;
           height: 16px;
-          color: #ffffff;
-          filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+          color: #fce494; /* Radiant 24k warm gold */
+          filter: drop-shadow(0 0 6px rgba(245, 205, 110, 0.85))
+                  drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8));
+          transition: color 0.2s ease, filter 0.2s ease;
         }
 
-        /* Original mobile dimensions: 28px */
+        /* Mobile sizing */
         @media (max-width: 768px) {
           .smoke-link-btn {
             width: 28px;
@@ -281,10 +288,17 @@ export function FloatingSocials() {
           }
         }
 
-        /* Hover & Tap scale */
+        /* Hover & Tap: Intensify gold radiance */
         .smoke-link-btn:hover {
           transform: scale(1.22);
-          border-color: rgba(255, 255, 255, 0.85);
+          border-color: #ffd868;
+          box-shadow: 0 0 20px rgba(250, 210, 110, 0.9),
+                      inset 0 0 8px rgba(245, 205, 100, 0.4) !important;
+        }
+
+        .smoke-link-btn:hover :global(.social-svg) {
+          color: #ffffff;
+          filter: drop-shadow(0 0 8px rgba(255, 225, 130, 1));
         }
 
         .smoke-link-btn:active {
@@ -292,8 +306,8 @@ export function FloatingSocials() {
         }
 
         /* =========================================================================
-           SMOKE TRAIL PSEUDO-ELEMENT (::before):
-           Faint blurred circular/radial smoke tail trailing behind motion
+           GOLDEN SMOKE TRAIL (::before):
+           Casts a warm glowing golden cloud behind each icon
            ========================================================================= */
         .smoke-link-btn::before {
           content: "";
@@ -302,10 +316,10 @@ export function FloatingSocials() {
           border-radius: 50%;
           background: var(--trail-gradient);
           filter: blur(10px);
-          opacity: 0.7;
+          opacity: 0.75;
           pointer-events: none;
           z-index: -1;
-          animation: glowPulse 3s ease-in-out infinite;
+          animation: goldAuraGlow 2.5s ease-in-out infinite;
         }
 
         @media (max-width: 768px) {
@@ -317,7 +331,6 @@ export function FloatingSocials() {
 
         /* =========================================================================
            PREFERS-REDUCED-MOTION:
-           Slows or halts animation for accessibility
            ========================================================================= */
         @media (prefers-reduced-motion: reduce) {
           .smoke-drift-item {
@@ -357,13 +370,13 @@ export function FloatingSocials() {
             className="smoke-link-btn"
             style={
               {
-                background: item.brandGradient,
-                boxShadow: `0 0 26px ${item.glowColor}, inset 0 1px 2px rgba(255,255,255,0.4)`,
+                background: item.goldGradient,
+                boxShadow: `0 0 16px ${item.glowColor}, inset 0 1px 3px rgba(250, 220, 140, 0.35)`,
                 "--trail-gradient": item.trailGradient,
               } as React.CSSProperties
             }
             onClick={(e) => {
-              // Ignore navigation if user is executing a press-and-hold pause
+              // Avoid accidental navigation on a long press hold
               if (isLongPressRef.current) {
                 e.preventDefault()
               }
