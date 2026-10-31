@@ -6,13 +6,13 @@
  * Replace the placeholder URL with your actual Google Form URL when ready.
  * ============================================================================
  */
-export const MEMBERSHIP_GOOGLE_FORM_URL = "https://forms.google.com/your-invictors-membership-form"
+export const MEMBERSHIP_GOOGLE_FORM_URL = "https://forms.gle/it2ERARmmJxQs3qY9"
 
 export const MEMBERSHIP_DETAILS = {
   academicYear: "ACADEMIC YEAR 2026–27",
   title: "Official INVICTORS Club Membership",
   tagline: "Unravel the Clues. Hack the Rules. Build the Future.",
-  status: "REGISTRATIONS OPENING SOON", // e.g. "REGISTRATIONS OPEN" or "APPLICATIONS LIVE"
+  status: "REGISTRATIONS OPEN", // Form is active and accepting student responses
   description:
     "Join the vanguard of experiential engineering at Vidyavardhaka College of Engineering. As an official INVICTORS member, you gain priority access to our signature murder-mystery code heists, hardware deconstruction labs, sustainable e-waste hackathons, AI prompt craft sessions, and corporate industrial visits.",
   benefits: [
