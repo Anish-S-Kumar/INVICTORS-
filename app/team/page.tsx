@@ -9,10 +9,15 @@ import {
   ExternalLink,
   Shield,
   Award,
+  Crown,
+  FileText,
   Terminal,
   Calendar,
   Wand2,
   Megaphone,
+  Share2,
+  Cpu,
+  BarChart3,
   Code,
   Sparkles,
   CheckCircle2,
@@ -30,10 +35,14 @@ import {
 function getCoreIcon(iconName?: string) {
   const cls = "w-4 h-4 text-amber-300"
   switch (iconName) {
+    case "Crown":
+      return <Crown className={cls} />
     case "Shield":
       return <Shield className={cls} />
     case "Award":
       return <Award className={cls} />
+    case "FileText":
+      return <FileText className={cls} />
     case "Terminal":
       return <Terminal className={cls} />
     case "Calendar":
@@ -42,6 +51,12 @@ function getCoreIcon(iconName?: string) {
       return <Wand2 className={cls} />
     case "Megaphone":
       return <Megaphone className={cls} />
+    case "Share2":
+      return <Share2 className={cls} />
+    case "Cpu":
+      return <Cpu className={cls} />
+    case "BarChart3":
+      return <BarChart3 className={cls} />
     case "Code":
       return <Code className={cls} />
     default:
@@ -59,7 +74,7 @@ export default function TeamPage() {
     >
       <div className="space-y-12 pb-12">
         {/* ============================================================== */}
-        {/* SECTION 1: FACULTY COORDINATORS                                */}
+        {/* SECTION 1: HOD & FACULTY COORDINATORS                          */}
         {/* ============================================================== */}
         <section>
           <div className="flex items-center gap-3 mb-6">
@@ -68,7 +83,7 @@ export default function TeamPage() {
             </div>
             <div>
               <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gradient-gold tracking-tight uppercase">
-                Faculty Coordinators & Mentors
+                HOD & Faculty Coordinators
               </h2>
               <p className="text-xs sm:text-sm text-silver-400 font-body">
                 Department of Computer Science & Engineering, Vidyavardhaka College of Engineering
@@ -76,23 +91,40 @@ export default function TeamPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {FACULTY_COORDINATORS.map((fac) => (
               <div
                 key={fac.id}
-                className="glass-panel p-6 rounded-2xl border border-amber-500/25 bg-black/40 hover:border-amber-400/60 hover:shadow-[0_0_24px_rgba(212,162,76,0.2)] transition-all flex flex-col justify-between group"
+                className={`glass-panel p-6 rounded-2xl border transition-all flex flex-col justify-between group ${
+                  fac.isHOD
+                    ? "border-amber-400/60 bg-gradient-to-b from-amber-950/40 via-black/60 to-black shadow-[0_0_30px_rgba(212,162,76,0.25)] hover:border-amber-300 hover:shadow-[0_0_36px_rgba(212,162,76,0.35)]"
+                    : "border-amber-500/25 bg-black/40 hover:border-amber-400/60 hover:shadow-[0_0_24px_rgba(212,162,76,0.2)]"
+                }`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-4">
-                    <div className="w-12 h-12 rounded-full border border-amber-500/40 bg-gradient-to-br from-amber-600/30 via-black to-black flex items-center justify-center font-display font-bold text-sm text-amber-300 shadow-[0_0_12px_rgba(212,162,76,0.2)]">
-                      {fac.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .slice(0, 2)
-                        .join("")}
+                    <div
+                      className={`w-12 h-12 rounded-full border flex items-center justify-center font-display font-bold text-sm ${
+                        fac.isHOD
+                          ? "border-amber-400 bg-gradient-to-br from-amber-500/40 via-amber-950 to-black text-amber-200 shadow-[0_0_14px_rgba(212,162,76,0.4)]"
+                          : "border-amber-500/40 bg-gradient-to-br from-amber-600/30 via-black to-black text-amber-300 shadow-[0_0_12px_rgba(212,162,76,0.2)]"
+                      }`}
+                    >
+                      {fac.initials ||
+                        fac.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")}
                     </div>
                     {fac.badge && (
-                      <span className="font-mono text-[10px] px-2.5 py-0.5 rounded-full border border-amber-500/30 bg-amber-950/70 text-amber-300 uppercase">
+                      <span
+                        className={`font-mono text-[10px] px-2.5 py-0.5 rounded-full border uppercase ${
+                          fac.isHOD
+                            ? "border-amber-400/70 bg-gradient-to-r from-amber-500/25 to-amber-600/35 text-amber-200 font-semibold shadow-[0_0_10px_rgba(212,162,76,0.3)]"
+                            : "border-amber-500/30 bg-amber-950/70 text-amber-300"
+                        }`}
+                      >
                         {fac.badge}
                       </span>
                     )}
@@ -127,15 +159,15 @@ export default function TeamPage() {
             </div>
             <div>
               <h2 className="font-display text-xl sm:text-2xl font-extrabold text-gradient-gold tracking-tight uppercase">
-                Core Committee (Student Leadership)
+                Core Committee (Student Coordinators)
               </h2>
               <p className="text-xs sm:text-sm text-silver-400 font-body">
-                Executive committee steering INVICTORS initiatives for Academic Year 2026–27
+                Student coordinators steering INVICTORS initiatives for Academic Year 2026–27
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {CORE_COMMITTEE.map((member: CoreTeamMember) => (
               <div
                 key={member.id}

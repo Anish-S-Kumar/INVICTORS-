@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
-import { RingField } from "@/components/decor/RingField"
 import { ArrowLeft } from "lucide-react"
 
 export const metadata: Metadata = {
@@ -19,12 +18,9 @@ export default function RankPage() {
     <div id="main-content" className="relative min-h-screen flex flex-col justify-between overflow-x-hidden">
       <Header showBack={true} backHref="/" backLabel="Dashboard" />
 
-      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center relative overflow-hidden">
-        {/* Full-strength RingField centered behind the trophy */}
-        <RingField isSubpage={true} isRankPage={true} className="absolute inset-0 z-0 pointer-events-none" />
-
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12 text-center relative">
         {/* Floating golden particle ambiance */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden z-0">
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
           <div className="w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle_at_center,rgba(212,162,76,0.15)_0%,transparent_70%)] blur-2xl" />
         </div>
 

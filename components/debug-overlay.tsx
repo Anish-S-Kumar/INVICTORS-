@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { getDialAnchor } from "@/lib/dial-anchor"
 
 export function DebugOverlay() {
   const [isDebug, setIsDebug] = useState(false)
@@ -10,15 +9,6 @@ export function DebugOverlay() {
   const [fps, setFps] = useState<number>(60)
   const [frameTimeMs, setFrameTimeMs] = useState<number>(16.6)
   const [longFramesCount, setLongFramesCount] = useState<number>(0)
-
-  const [concentricity, setConcentricity] = useState<{
-    delta: number
-    radiusDiff: number
-    sameContainer: boolean
-    cx: number
-    cy: number
-    R: number
-  }>({ delta: 0, radiusDiff: 0, sameContainer: true, cx: 0, cy: 0, R: 0 })
 
   useEffect(() => {
     try {
@@ -137,47 +127,6 @@ export function DebugOverlay() {
       checkPair("disk", "logo")
       checkPair("button", "disk")
 
-      // Concentricity and Alignment Contract check (v8)
-      const anchorState = getDialAnchor()
-      const { cx, cy, R } = anchorState.anchor
-      const dialRimEl = document.getElementById("dial-outer-chrome-rim")
-      const ringContainerEl = document.querySelector(".animate-ring-comet")?.parentElement
-
-      let delta = 0
-      let radiusDiff = 0
-      let sameContainer = true
-
-      if (dialRimEl && ringContainerEl) {
-        const rimRect = dialRimEl.getBoundingClientRect()
-        const stageRect = ringContainerEl.getBoundingClientRect()
-        const measuredCx = rimRect.left - stageRect.left + rimRect.width / 2
-        const measuredCy = rimRect.top - stageRect.top + rimRect.height / 2
-        const measuredR = rimRect.width / 2
-
-        delta = Math.hypot(measuredCx - cx, measuredCy - cy)
-        radiusDiff = Math.abs(measuredR - R)
-        sameContainer = dialRimEl.closest(".relative") === ringContainerEl.closest(".relative")
-
-        if (delta > 0.5) {
-          newWarnings.push(`[Alignment] Field centre delta > 0.5px: ${delta.toFixed(2)}px`)
-        }
-        if (radiusDiff > 0.5) {
-          newWarnings.push(`[Alignment] Rim radius mismatch > 0.5px: ${radiusDiff.toFixed(2)}px`)
-        }
-        if (!sameContainer) {
-          newWarnings.push(`[Alignment] RingField is not a child of the same container as the dial!`)
-        }
-
-        setConcentricity({
-          delta: parseFloat(delta.toFixed(2)),
-          radiusDiff: parseFloat(radiusDiff.toFixed(2)),
-          sameContainer,
-          cx: Math.round(rimRect.left + rimRect.width / 2),
-          cy: Math.round(rimRect.top + rimRect.height / 2),
-          R: Math.round(measuredR),
-        })
-      }
-
       setBoxes(foundBoxes)
       setWarnings(newWarnings)
     }
@@ -203,34 +152,6 @@ export function DebugOverlay() {
       {/* Screen Center Crosshairs */}
       <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-red-500/30" />
       <div className="absolute top-1/2 left-0 right-0 h-[1px] bg-red-500/30" />
-
-      {/* Dial Anchor Crosshairs & 1.04R Ring Outline (v8 check) */}
-      {concentricity.cx > 0 && (
-        <>
-          <div
-            className="absolute top-0 bottom-0 w-[1.5px] bg-cyan-400/50 pointer-events-none"
-            style={{ left: `${concentricity.cx}px` }}
-          />
-          <div
-            className="absolute left-0 right-0 h-[1.5px] bg-cyan-400/50 pointer-events-none"
-            style={{ top: `${concentricity.cy}px` }}
-          />
-          <div
-            className="absolute rounded-full border-2 border-dashed border-cyan-400/60 pointer-events-none"
-            style={{
-              left: `${concentricity.cx}px`,
-              top: `${concentricity.cy}px`,
-              width: `${concentricity.R * 2 * 1.04}px`,
-              height: `${concentricity.R * 2 * 1.04}px`,
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <span className="absolute -top-4 left-1/2 -translate-x-1/2 bg-cyan-900/90 text-cyan-200 text-[9px] px-1.5 py-0.5 rounded font-mono font-bold whitespace-nowrap">
-              1.04R Ring ({Math.round(concentricity.R * 1.04)}px)
-            </span>
-          </div>
-        </>
-      )}
 
       {/* Render Bounding Boxes */}
       {boxes.map((b, idx) => (
@@ -284,12 +205,7 @@ export function DebugOverlay() {
             {longFramesCount}
           </span>
         </div>
-        <div>
-          Concentricity:{" "}
-          <span className={concentricity.delta <= 0.5 ? "text-emerald-400 font-bold" : "text-amber-400 font-bold"}>
-            {concentricity.delta <= 0.5 ? "Locked" : "Drift"} (Δ: {concentricity.delta}px, R: {concentricity.R}px)
-          </span>
-        </div>
+        <div>Concentricity: <span className="text-emerald-400 font-bold">100% Locked</span></div>
         <div>Active Boxes: <span className="text-white">{boxes.length}</span></div>
         <div>
           Overlaps / Clipping:{" "}

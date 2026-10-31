@@ -8,9 +8,6 @@ import { CLUB_METADATA } from "@/lib/content"
 
 import { CircuitSide } from "@/components/decor/CircuitSide"
 import { ForensicSide } from "@/components/decor/ForensicSide"
-import { RingField } from "@/components/decor/RingField"
-import { GoldDust } from "@/components/decor/GoldDust"
-import { SITE_CONFIG } from "@/lib/site-config"
 
 interface DashboardWrapperProps {
   isIntroPlaying?: boolean
@@ -55,29 +52,8 @@ export function DashboardWrapper({ isIntroPlaying = false }: DashboardWrapperPro
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {/* v8 Main Animated Circuit-Ring Field (concentric with dial, layer 0) */}
-      <RingField isMobile={!isDesktop} isIntroPlaying={isIntroPlaying} />
-
-      {/* Side Art: Radial mode (default) keeps subtle GoldDust and 8% binary streams at far edges */}
-      {SITE_CONFIG.sideArt === "radial" && !isIntroPlaying && (
-        <>
-          <div className="absolute left-0 top-0 bottom-0 w-24 pointer-events-none select-none overflow-hidden z-0">
-            <GoldDust count={14} />
-            <div className="absolute left-2 top-0 bottom-0 text-[10px] font-mono text-amber-500/[0.08] leading-tight select-none pointer-events-none whitespace-pre overflow-hidden">
-              {"01001001\n01001110\n01010110\n01001001\n01000011\n01010100\n01001111\n01010010\n01010011\n00100000\n01000011\n01010011\n01000101\n01010110\n01000011\n01001111\n01000101\n".repeat(6)}
-            </div>
-          </div>
-          <div className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none select-none overflow-hidden z-0">
-            <GoldDust count={14} />
-            <div className="absolute right-2 top-0 bottom-0 text-[10px] font-mono text-amber-500/[0.08] leading-tight select-none pointer-events-none whitespace-pre overflow-hidden text-right">
-              {"01000100\n01000101\n01000011\n01001111\n01000100\n01000101\n00101110\n01001001\n01001110\n01001110\n01001111\n01010110\n01000001\n01010100\n01000101\n00101110\n".repeat(6)}
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Legacy Side Art Mode */}
-      {SITE_CONFIG.sideArt === "legacy" && !isIntroPlaying && (
+      {/* Subtle Animated Side Backgrounds (Masked, non-competing, paused during intro) */}
+      {!isIntroPlaying && (
         <>
           <CircuitSide isMobile={!isDesktop} />
           <ForensicSide isMobile={!isDesktop} />

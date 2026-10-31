@@ -10,10 +10,15 @@ import {
   ExternalLink,
   Shield,
   Award,
+  Crown,
+  FileText,
   Terminal,
   Calendar,
   Wand2,
   Megaphone,
+  Share2,
+  Cpu,
+  BarChart3,
   Code,
   Sparkles,
   CheckCircle2,
@@ -36,10 +41,14 @@ interface TeamModalProps {
 function getCoreIcon(iconName?: string) {
   const cls = "w-4 h-4 text-amber-300"
   switch (iconName) {
+    case "Crown":
+      return <Crown className={cls} />
     case "Shield":
       return <Shield className={cls} />
     case "Award":
       return <Award className={cls} />
+    case "FileText":
+      return <FileText className={cls} />
     case "Terminal":
       return <Terminal className={cls} />
     case "Calendar":
@@ -48,6 +57,12 @@ function getCoreIcon(iconName?: string) {
       return <Wand2 className={cls} />
     case "Megaphone":
       return <Megaphone className={cls} />
+    case "Share2":
+      return <Share2 className={cls} />
+    case "Cpu":
+      return <Cpu className={cls} />
+    case "BarChart3":
+      return <BarChart3 className={cls} />
     case "Code":
       return <Code className={cls} />
     default:
@@ -138,7 +153,7 @@ export function TeamModal({ isOpen, onClose }: TeamModalProps) {
             {/* Scrollable Content Body */}
             <div className="flex-1 overflow-y-auto p-5 sm:p-7 space-y-8 custom-scrollbar">
               {/* ============================================================== */}
-              {/* SECTION 1: FACULTY COORDINATORS                                */}
+              {/* SECTION 1: HOD & FACULTY COORDINATORS                          */}
               {/* ============================================================== */}
               <section>
                 <div className="flex items-center gap-2 mb-4">
@@ -147,7 +162,7 @@ export function TeamModal({ isOpen, onClose }: TeamModalProps) {
                   </div>
                   <div>
                     <h3 className="font-display text-base sm:text-lg font-bold text-amber-300 tracking-wide uppercase">
-                      Faculty Coordinators & Mentors
+                      HOD & Faculty Coordinators
                     </h3>
                     <p className="text-[11px] sm:text-xs text-silver-400 font-body">
                       Department of Computer Science & Engineering, Vidyavardhaka College of Engineering
@@ -155,23 +170,40 @@ export function TeamModal({ isOpen, onClose }: TeamModalProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {FACULTY_COORDINATORS.map((fac) => (
                     <div
                       key={fac.id}
-                      className="glass-panel p-4 sm:p-5 rounded-2xl border border-amber-500/25 bg-black/40 hover:border-amber-400/60 hover:shadow-[0_0_20px_rgba(212,162,76,0.15)] transition-all flex flex-col justify-between group"
+                      className={`glass-panel p-4 sm:p-5 rounded-2xl border transition-all flex flex-col justify-between group ${
+                        fac.isHOD
+                          ? "border-amber-400/60 bg-gradient-to-b from-amber-950/40 via-black/60 to-black shadow-[0_0_24px_rgba(212,162,76,0.2)] hover:border-amber-300 hover:shadow-[0_0_30px_rgba(212,162,76,0.3)]"
+                          : "border-amber-500/25 bg-black/40 hover:border-amber-400/60 hover:shadow-[0_0_20px_rgba(212,162,76,0.15)]"
+                      }`}
                     >
                       <div>
                         <div className="flex items-center justify-between gap-2 mb-3">
-                          <div className="w-10 h-10 rounded-full border border-amber-500/40 bg-gradient-to-br from-amber-600/30 via-black to-black flex items-center justify-center font-display font-bold text-xs text-amber-300">
-                            {fac.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .slice(0, 2)
-                              .join("")}
+                          <div
+                            className={`w-10 h-10 rounded-full border flex items-center justify-center font-display font-bold text-xs ${
+                              fac.isHOD
+                                ? "border-amber-400 bg-gradient-to-br from-amber-500/40 via-amber-950 to-black text-amber-200 shadow-[0_0_12px_rgba(212,162,76,0.4)]"
+                                : "border-amber-500/40 bg-gradient-to-br from-amber-600/30 via-black to-black text-amber-300"
+                            }`}
+                          >
+                            {fac.initials ||
+                              fac.name
+                                .split(" ")
+                                .map((n) => n[0])
+                                .slice(0, 2)
+                                .join("")}
                           </div>
                           {fac.badge && (
-                            <span className="font-mono text-[9px] px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-950/70 text-amber-300 uppercase">
+                            <span
+                              className={`font-mono text-[9px] px-2 py-0.5 rounded-full border uppercase ${
+                                fac.isHOD
+                                  ? "border-amber-400/70 bg-gradient-to-r from-amber-500/25 to-amber-600/35 text-amber-200 font-semibold shadow-[0_0_8px_rgba(212,162,76,0.3)]"
+                                  : "border-amber-500/30 bg-amber-950/70 text-amber-300"
+                              }`}
+                            >
                               {fac.badge}
                             </span>
                           )}
@@ -206,15 +238,15 @@ export function TeamModal({ isOpen, onClose }: TeamModalProps) {
                   </div>
                   <div>
                     <h3 className="font-display text-base sm:text-lg font-bold text-amber-300 tracking-wide uppercase">
-                      Core Committee (Student Leadership)
+                      Core Committee (Student Coordinators)
                     </h3>
                     <p className="text-[11px] sm:text-xs text-silver-400 font-body">
-                      Executive committee managing strategic initiatives, tech challenges, and operations
+                      Student coordinators steering INVICTORS initiatives for Academic Year 2026–27
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {CORE_COMMITTEE.map((member: CoreTeamMember) => (
                     <div
                       key={member.id}
