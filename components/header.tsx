@@ -140,13 +140,8 @@ export function Header({
         </div>
       </div>
 
-      {/* Floating Smoky Social Media Strip directly below the header title */}
-      <div className="w-full">
-        <FloatingSocials />
-      </div>
-
       {/* Option bar below header: Core Team, Faculty Coordinators & Membership */}
-      <div className="w-full flex items-center justify-center gap-2 pb-2 px-3 pointer-events-auto">
+      <div className="w-full flex items-center justify-center gap-2 pb-1.5 px-3 pointer-events-auto">
         <button
           type="button"
           onClick={() => setIsTeamModalOpen(true)}
@@ -169,6 +164,11 @@ export function Header({
           <span>Membership Form</span>
           <ExternalLink className="w-3 h-3 text-amber-400/80" />
         </a>
+      </div>
+
+      {/* Floating Smoky Social Media Strip placed on the lower edge right above the dividing gold line */}
+      <div className="w-full relative z-20 pb-1">
+        <FloatingSocials />
       </div>
 
       {/* Bottom edge: Fading gold hairline with center crosshair node */}
