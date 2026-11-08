@@ -44,7 +44,7 @@ export default function HomePage() {
 
       {/* Row 1: Slim Header (64px mobile, 72px laptop) - fades in when intro ends */}
       <div className={`transition-opacity duration-700 ease-out ${introFinished ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-        <Header />
+        <Header showHomeExtras={true} />
       </div>
 
       {/* Row 2: Dashboard Stage - mounted underneath for zero jank, fades in over 600ms */}
