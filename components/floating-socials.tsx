@@ -75,7 +75,7 @@ export function FloatingSocials() {
       glowColor: "rgba(230, 190, 90, 0.85)",
       trailGradient:
         "radial-gradient(circle, rgba(230, 190, 90, 0.45) 0%, rgba(180, 130, 40, 0.18) 50%, transparent 75%)",
-      duration: 21,
+      duration: 20,
       delay: 0,
       icon: (
         <svg
@@ -103,7 +103,7 @@ export function FloatingSocials() {
       glowColor: "rgba(240, 205, 110, 0.88)",
       trailGradient:
         "radial-gradient(circle, rgba(240, 205, 110, 0.45) 0%, rgba(190, 140, 45, 0.18) 50%, transparent 75%)",
-      duration: 21,
+      duration: 24,
       delay: 7,
       icon: (
         <svg
@@ -125,7 +125,7 @@ export function FloatingSocials() {
       glowColor: "rgba(235, 195, 95, 0.85)",
       trailGradient:
         "radial-gradient(circle, rgba(235, 195, 95, 0.45) 0%, rgba(185, 135, 42, 0.18) 50%, transparent 75%)",
-      duration: 21,
+      duration: 22,
       delay: 14,
       icon: (
         <svg
@@ -185,36 +185,43 @@ export function FloatingSocials() {
         }
 
         /* =========================================================================
-           STRAIGHT SMOKY DRIFT KEYFRAMES:
-           - Enters left: blur(10px), opacity: 0
-           - Straight horizontal motion: no up-and-down wave, no tilt/rotation
-           - Middle section: crystal sharp (blur 0px), 100% visible, luminous gold glow
-           - Exits right: dissolves out smoothly with blur(12px) and opacity 0
+           SMOKY DRIFT KEYFRAMES:
+           - Enters left: blur(10px), opacity: 0, subdued glow
+           - Towards center: sharp (blur 0px), 100% visible, bright pulsing gold glow
+           - Wave: smooth 8px to 10px sinusoidal drift with subtle tilt
+           - Exits right: dissolves out with blur(12px) and opacity 0
            ========================================================================= */
         @keyframes smokeDrift {
           0% {
-            transform: translate3d(-60px, -50%, 0);
+            transform: translate3d(-60px, 0px, 0) rotate(-2deg) scale(0.9);
             opacity: 0;
             filter: blur(10px);
           }
-          8% {
+          10% {
             opacity: 0.95;
             filter: blur(1.5px);
           }
-          18% {
+          25% {
+            transform: translate3d(calc(25vw - 16px), -8px, 0) rotate(2deg) scale(1.02);
+            filter: blur(0px);
+          }
+          50% {
+            /* Center of the screen: Peak sharpness & peak gold glow */
+            transform: translate3d(calc(50vw - 16px), 8px, 0) rotate(-1.5deg) scale(1);
             opacity: 1;
             filter: blur(0px);
           }
-          82% {
-            opacity: 1;
-            filter: blur(0px);
+          75% {
+            transform: translate3d(calc(75vw - 16px), -6px, 0) rotate(2deg) scale(1.01);
+            opacity: 0.95;
+            filter: blur(0.5px);
           }
-          92% {
+          90% {
             opacity: 0.65;
             filter: blur(4px);
           }
           100% {
-            transform: translate3d(calc(100vw + 60px), -50%, 0);
+            transform: translate3d(calc(100vw + 60px), 3px, 0) rotate(-2deg) scale(0.9);
             opacity: 0;
             filter: blur(12px);
           }
@@ -233,14 +240,7 @@ export function FloatingSocials() {
         }
 
         .smoke-drift-item {
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          animation-name: smokeDrift;
-          animation-timing-function: linear;
-          animation-iteration-count: infinite;
-          will-change: transform, opacity, filter;
+          position: relative;
         }
 
         /* =========================================================================
@@ -361,11 +361,7 @@ export function FloatingSocials() {
         <div
           key={item.id}
           className="smoke-drift-item"
-          style={{
-            animationDuration: `${item.duration}s`,
-            animationDelay: `${item.delay}s`,
-            animationPlayState: isPaused || isHovered ? "paused" : "running",
-          }}
+          style={{}}
         >
           <a
             href={item.href}

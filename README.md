@@ -66,7 +66,9 @@ An award-winning, cinematic, fully responsive web application engineered for the
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Structure & Dashboards
+
+For an in-depth breakdown of the architecture, data flow, and sub-dashboards, see [ARCHITECTURE.md](file:///ARCHITECTURE.md).
 
 ```
 INVICTORS-/
@@ -74,34 +76,38 @@ INVICTORS-/
 │   ├── layout.tsx            # Global metadata, fonts (Orbitron + Rajdhani), theme provider
 │   ├── globals.css           # Design tokens, gold/silver gradients, circuit SVG background
 │   ├── page.tsx              # Main page (100dvh single frame, Intro + DashboardWrapper)
-│   ├── overview/page.tsx     # /overview route
-│   ├── mission/page.tsx      # /mission route (Horizontal Scroll Timeline)
-│   ├── unique/page.tsx       # /unique route
-│   ├── pillars/page.tsx      # /pillars route
-│   ├── events/page.tsx       # /events route
-│   └── rank/page.tsx         # /rank route (robots: noindex)
+│   ├── overview/page.tsx     # /overview dashboard (Vision & summary)
+│   ├── mission/page.tsx      # /mission dashboard (Horizontal Scroll Timeline)
+│   ├── unique/page.tsx       # /unique dashboard (Competitive differentiation)
+│   ├── pillars/page.tsx      # /pillars dashboard (Technical domains)
+│   ├── events/page.tsx       # /events dashboard (Signature events & hackathons)
+│   ├── team/page.tsx         # /team dashboard (Faculty coordinators & Core committee)
+│   ├── rank/page.tsx         # /rank dashboard (Leaderboards, robots: noindex)
+│   └── api/
+│       └── intro-video/      # Chunked streaming video delivery endpoint
 ├── components/
-│   ├── header.tsx            # Slim header: VVCE logo, centered college/CSE title, CSE logo
-│   ├── footer.tsx            # Club proposal footer & metadata
-│   ├── intro-animation.tsx   # 5-stage cinematic entrance
-│   ├── card-art.tsx          # Bespoke SVG circuit/forensic panels for cards
+│   ├── header.tsx            # Slim header: logos, title & navigation triggers
+│   ├── floating-socials.tsx  # Gold social media bar (Instagram, LinkedIn, Gmail)
+│   ├── team-modal.tsx        # Quick-access modal for team & membership
 │   ├── dashboard-wrapper.tsx # Hydration-safe desktop/mobile layout switch
-│   └── ui/
-│       ├── timeline.tsx      # Horizontal-scroll GSAP + Lenis timeline
-│       ├── works-wheel.tsx   # Desktop 3D drum & ring engine (clamped, title-only)
-│       ├── wheel-carousel.tsx# Mobile left-curved roll-down disk engine
-│       └── button.tsx        # shadcn button component
+│   ├── page-shell.tsx        # Standard shell container for sub-dashboards
+│   ├── intro-video.tsx       # Cinematic video player
+│   ├── card-art.tsx          # Bespoke SVG circuit/forensic panels for cards
+│   ├── ui/
+│   │   ├── works-wheel.tsx        # Desktop 3D drum & ring dashboard engine
+│   │   ├── mobile-rotary-dial.tsx # Mobile left-curved rotary dial engine
+│   │   ├── timeline.tsx           # Horizontal-scroll GSAP + Lenis timeline
+│   │   └── button.tsx             # shadcn button primitive
+│   └── decor/
+│       ├── CircuitSide.tsx   # Cybernetic circuit accent lines
+│       └── ForensicSide.tsx  # Forensic fingerprint scan art
 ├── lib/
 │   ├── content.ts            # Single typed source-of-truth for all proposal content
+│   ├── team-data.ts          # Faculty & student committee profiles
+│   ├── membership-config.ts  # Google Form URL & recruitment settings
 │   └── utils.ts              # cn helper (clsx + tailwind-merge)
 └── public/
-    ├── assets/
-    │   ├── invictors-logo.png# INVICTORS high-resolution circular badge
-    │   ├── college-logo.png  # Vidyavardhaka College of Engineering emblem
-    │   └── cse-logo.png      # Dept. of CSE hexagonal logo
-    ├── favicon.ico           # Multi-resolution club favicon
-    ├── apple-touch-icon.png  # Apple touch icon
-    └── og-image.png          # Social preview OpenGraph image (1200x630)
+    └── assets/               # Logos, badges, and icons
 ```
 
 ---
