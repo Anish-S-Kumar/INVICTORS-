@@ -4,8 +4,9 @@ import React, { useEffect, useState, useRef } from "react"
 
 /**
  * CONFIGURATION & LINKS
- * Gold & cyber-amber aesthetic harmonized with the website's dark luxury palette.
- * Grouped drifting strip with direct label buttons for Instagram, Gmail & LinkedIn.
+ * Translucent glassmorphism with golden rim and glowing ambient aura.
+ * Matches the background without any solid black blocking.
+ * Spread across the screen: Left, Center, and Right.
  */
 interface SocialConfig {
   id: string
@@ -13,14 +14,13 @@ interface SocialConfig {
   label: string
   href: string
   icon: React.ReactNode
-  goldGradient: string
   glowColor: string
   trailGradient: string
+  positionClass: string
 }
 
 export function FloatingSocials() {
   const [isPaused, setIsPaused] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
   const pressTimerRef = useRef<NodeJS.Timeout | null>(null)
   const isLongPressRef = useRef(false)
 
@@ -30,7 +30,6 @@ export function FloatingSocials() {
       if (pressTimerRef.current) clearTimeout(pressTimerRef.current)
       isLongPressRef.current = false
 
-      // Pause if held longer than 140ms
       pressTimerRef.current = setTimeout(() => {
         isLongPressRef.current = true
         setIsPaused(true)
@@ -70,11 +69,10 @@ export function FloatingSocials() {
       name: "Instagram",
       label: "Follow Us",
       href: "https://www.instagram.com/theinvictors.vvce?vrfl=bTlkaHVkY3MzaTdz",
-      goldGradient:
-        "linear-gradient(135deg, rgba(24, 18, 8, 0.92) 0%, rgba(42, 30, 12, 0.95) 50%, rgba(15, 12, 6, 0.96) 100%)",
-      glowColor: "rgba(230, 190, 90, 0.85)",
+      glowColor: "rgba(230, 190, 90, 0.6)",
       trailGradient:
-        "radial-gradient(circle, rgba(230, 190, 90, 0.45) 0%, rgba(180, 130, 40, 0.18) 50%, transparent 75%)",
+        "radial-gradient(circle, rgba(230, 190, 90, 0.3) 0%, rgba(180, 130, 40, 0.1) 50%, transparent 75%)",
+      positionClass: "justify-self-start",
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -97,11 +95,10 @@ export function FloatingSocials() {
       name: "Gmail",
       label: "Contact Us",
       href: "mailto:invictorsofficial@gmail.com",
-      goldGradient:
-        "linear-gradient(135deg, rgba(24, 18, 8, 0.92) 0%, rgba(45, 32, 14, 0.95) 50%, rgba(15, 12, 6, 0.96) 100%)",
-      glowColor: "rgba(235, 195, 95, 0.85)",
+      glowColor: "rgba(235, 195, 95, 0.6)",
       trailGradient:
-        "radial-gradient(circle, rgba(235, 195, 95, 0.45) 0%, rgba(185, 135, 42, 0.18) 50%, transparent 75%)",
+        "radial-gradient(circle, rgba(235, 195, 95, 0.3) 0%, rgba(185, 135, 42, 0.1) 50%, transparent 75%)",
+      positionClass: "justify-self-center",
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -123,11 +120,10 @@ export function FloatingSocials() {
       name: "LinkedIn",
       label: "LinkedIn Profile",
       href: "https://linkedin.com/in/invictors-club-423576445",
-      goldGradient:
-        "linear-gradient(135deg, rgba(24, 18, 8, 0.92) 0%, rgba(45, 32, 14, 0.95) 50%, rgba(15, 12, 6, 0.96) 100%)",
-      glowColor: "rgba(240, 205, 110, 0.88)",
+      glowColor: "rgba(240, 205, 110, 0.6)",
       trailGradient:
-        "radial-gradient(circle, rgba(240, 205, 110, 0.45) 0%, rgba(190, 140, 45, 0.18) 50%, transparent 75%)",
+        "radial-gradient(circle, rgba(240, 205, 110, 0.3) 0%, rgba(190, 140, 45, 0.1) 50%, transparent 75%)",
+      positionClass: "justify-self-end",
       icon: (
         <svg
           viewBox="0 0 24 24"
@@ -145,136 +141,95 @@ export function FloatingSocials() {
     <div
       className="smoke-socials-wrapper"
       aria-label="Social media channels"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <style jsx>{`
         /* =========================================================================
-           CONTAINER SIZING:
-           Wide drifting lane with smooth continuous loop
+           CONTAINER SIZING & SPACING:
+           Spans the width with left, center, and right distribution.
+           Pure transparent background - no solid black box.
            ========================================================================= */
         .smoke-socials-wrapper {
           position: relative;
           width: 100%;
-          height: 38px;
-          overflow-x: hidden;
-          overflow-y: visible;
-          pointer-events: auto;
-          user-select: none;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 4px 16px;
           display: flex;
           align-items: center;
-          margin: 2px 0;
-        }
-
-        /* Desktop hover-to-pause: When cursor is placed anywhere on the strip, freeze motion */
-        @media (hover: hover) and (pointer: fine) {
-          .smoke-socials-wrapper:hover .socials-convoy-track {
-            animation-play-state: paused !important;
-          }
+          justify-content: space-between;
+          background: transparent !important;
+          pointer-events: auto;
+          user-select: none;
         }
 
         @media (max-width: 768px) {
           .smoke-socials-wrapper {
-            height: 36px;
-            margin: 2px 0;
+            padding: 4px 10px;
           }
         }
 
-        /* =========================================================================
-           GROUP MOVEMENT (CONVOY DRIFT):
-           All items move together in a unified convoy from left to right,
-           fading in softly from the left edge and fading out at the right.
-           ========================================================================= */
-        @keyframes convoyDrift {
-          0% {
-            transform: translate3d(-100%, 0, 0);
-            opacity: 0;
-            filter: blur(8px);
-          }
-          10% {
-            opacity: 0.95;
-            filter: blur(1px);
-          }
-          25% {
-            filter: blur(0px);
+        /* Ambient floating wave keyframes */
+        @keyframes floatGently {
+          0%, 100% {
+            transform: translateY(0px);
           }
           50% {
-            transform: translate3d(calc(50vw - 50%), 0, 0);
-            opacity: 1;
-            filter: blur(0px);
-          }
-          75% {
-            filter: blur(0px);
-          }
-          90% {
-            opacity: 0.8;
-            filter: blur(2px);
-          }
-          100% {
-            transform: translate3d(calc(100vw + 60px), 0, 0);
-            opacity: 0;
-            filter: blur(10px);
+            transform: translateY(-3px);
           }
         }
 
-        .socials-convoy-track {
-          position: absolute;
-          left: 0;
-          top: 50%;
-          transform: translateY(-50%);
-          display: flex;
-          align-items: center;
-          /* Wide space between the items */
-          gap: 24px;
-          white-space: nowrap;
-          animation: convoyDrift 22s linear infinite;
-          will-change: transform, opacity, filter;
-        }
-
-        @media (max-width: 768px) {
-          .socials-convoy-track {
-            gap: 16px;
-            animation-duration: 20s;
-          }
-        }
-
-        /* Breathing radiance for gold aura */
+        /* Breathing radiance for golden aura */
         @keyframes goldAuraGlow {
           0%, 100% {
-            opacity: 0.65;
+            opacity: 0.5;
             transform: scale(1);
           }
           50% {
-            opacity: 0.95;
+            opacity: 0.85;
             transform: scale(1.08);
           }
         }
 
         /* =========================================================================
-           SOCIAL PILL / CARD WITH TEXT:
-           Direct clickable pill with logo and label text
+           TRANSLUCENT GLASS SOCIAL PILL:
+           Blends seamlessly with the dark circuit/neural canvas.
+           No plane black background.
            ========================================================================= */
         .smoke-social-pill {
           position: relative;
-          pointer-events: auto;
           display: inline-flex;
           align-items: center;
           gap: 8px;
           padding: 4px 12px 4px 6px;
           border-radius: 9999px;
-          border: 1px solid rgba(230, 190, 80, 0.65);
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
+          /* Translucent amber glass border with zero solid black fill */
+          border: 1px solid rgba(230, 190, 80, 0.45);
+          background: rgba(18, 14, 8, 0.35);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           cursor: pointer;
           text-decoration: none;
-          transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-                      border-color 0.2s ease,
-                      box-shadow 0.2s ease;
+          animation: floatGently 4s ease-in-out infinite;
+          transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                      border-color 0.25s ease,
+                      background 0.25s ease,
+                      box-shadow 0.25s ease;
           touch-action: manipulation;
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* Icon round badge inside pill */
+        /* Staggered float delays */
+        .smoke-social-pill.item-0 {
+          animation-delay: 0s;
+        }
+        .smoke-social-pill.item-1 {
+          animation-delay: 1.3s;
+        }
+        .smoke-social-pill.item-2 {
+          animation-delay: 2.6s;
+        }
+
+        /* Icon round translucent container */
         .social-icon-box {
           display: flex;
           align-items: center;
@@ -282,12 +237,12 @@ export function FloatingSocials() {
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          background: rgba(0, 0, 0, 0.45);
-          border: 1px solid rgba(240, 205, 110, 0.4);
+          background: rgba(230, 190, 80, 0.12);
+          border: 1px solid rgba(240, 205, 110, 0.5);
           shrink: 0;
         }
 
-        /* Pure golden SVG with bright glow */
+        /* Luminous gold SVG */
         .smoke-social-pill :global(.social-svg) {
           width: 14px;
           height: 14px;
@@ -296,7 +251,7 @@ export function FloatingSocials() {
           transition: color 0.2s ease, filter 0.2s ease;
         }
 
-        /* Label text beside the logo */
+        /* Label text styled with gold glow */
         .social-label {
           font-family: var(--font-rajdhani), sans-serif;
           font-size: 11.5px;
@@ -305,35 +260,36 @@ export function FloatingSocials() {
           text-transform: uppercase;
           color: #f5eed3;
           white-space: nowrap;
-          text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+          text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
           transition: color 0.2s ease;
         }
 
         @media (max-width: 768px) {
           .smoke-social-pill {
-            padding: 3px 10px 3px 5px;
-            gap: 6px;
+            padding: 3px 8px 3px 4px;
+            gap: 5px;
           }
           .social-icon-box {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
           }
           .smoke-social-pill :global(.social-svg) {
-            width: 12px;
-            height: 12px;
+            width: 11px;
+            height: 11px;
           }
           .social-label {
-            font-size: 10px;
-            letter-spacing: 0.05em;
+            font-size: 9.5px;
+            letter-spacing: 0.04em;
           }
         }
 
-        /* Hover & Tap: Intensify gold radiance */
+        /* Hover & Tap: Intensify gold radiance and glow without changing blackness */
         .smoke-social-pill:hover {
-          transform: scale(1.08);
+          transform: scale(1.08) translateY(-2px);
           border-color: #ffd868;
-          box-shadow: 0 0 20px rgba(250, 210, 110, 0.9),
-                      inset 0 0 8px rgba(245, 205, 100, 0.4) !important;
+          background: rgba(45, 32, 14, 0.5);
+          box-shadow: 0 0 20px rgba(250, 210, 110, 0.8),
+                      inset 0 0 8px rgba(245, 205, 100, 0.3) !important;
         }
 
         .smoke-social-pill:hover .social-label {
@@ -349,78 +305,53 @@ export function FloatingSocials() {
           transform: scale(0.95);
         }
 
-        /* Golden Aura Backdrop */
+        /* Subtle glowing aura behind each pill to fit into the ambient background */
         .smoke-social-pill::before {
           content: "";
           position: absolute;
-          inset: -4px -10px -4px -10px;
+          inset: -4px -8px -4px -8px;
           border-radius: 9999px;
           background: var(--trail-gradient);
           filter: blur(8px);
-          opacity: 0.7;
+          opacity: 0.6;
           pointer-events: none;
           z-index: -1;
-          animation: goldAuraGlow 2.5s ease-in-out infinite;
+          animation: goldAuraGlow 3s ease-in-out infinite;
         }
 
-        /* =========================================================================
-           PREFERS-REDUCED-MOTION:
-           ========================================================================= */
         @media (prefers-reduced-motion: reduce) {
-          .socials-convoy-track {
+          .smoke-social-pill {
             animation: none !important;
-            position: relative !important;
-            left: auto !important;
-            top: auto !important;
-            transform: none !important;
-            margin: 0 auto;
-            justify-content: center;
-            opacity: 1 !important;
-            filter: none !important;
-          }
-          .smoke-socials-wrapper {
-            justify-content: center;
-            height: auto;
-            overflow: visible;
           }
         }
       `}</style>
 
-      {/* Convoy Track: All 3 items move together simultaneously with wide spacing */}
-      <div
-        className="socials-convoy-track"
-        style={{
-          animationPlayState: isPaused || isHovered ? "paused" : "running",
-        }}
-      >
-        {socials.map((item) => (
-          <a
-            key={item.id}
-            href={item.href}
-            target={item.href.startsWith("mailto:") ? undefined : "_blank"}
-            rel={item.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-            aria-label={`${item.label} on ${item.name}`}
-            title={`${item.label} (${item.name})`}
-            className="smoke-social-pill"
-            style={
-              {
-                background: item.goldGradient,
-                boxShadow: `0 0 16px ${item.glowColor}, inset 0 1px 3px rgba(250, 220, 140, 0.35)`,
-                "--trail-gradient": item.trailGradient,
-              } as React.CSSProperties
+      {socials.map((item, index) => (
+        <a
+          key={item.id}
+          href={item.href}
+          target={item.href.startsWith("mailto:") ? undefined : "_blank"}
+          rel={item.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+          aria-label={`${item.label} on ${item.name}`}
+          title={`${item.label} (${item.name})`}
+          className={`smoke-social-pill item-${index}`}
+          style={
+            {
+              boxShadow: `0 0 12px ${item.glowColor}, inset 0 1px 2px rgba(250, 220, 140, 0.25)`,
+              "--trail-gradient": item.trailGradient,
+              animationPlayState: isPaused ? "paused" : "running",
+            } as React.CSSProperties
+          }
+          onClick={(e) => {
+            if (isLongPressRef.current) {
+              e.preventDefault()
             }
-            onClick={(e) => {
-              // Avoid accidental navigation on a long press hold
-              if (isLongPressRef.current) {
-                e.preventDefault()
-              }
-            }}
-          >
-            <div className="social-icon-box">{item.icon}</div>
-            <span className="social-label">{item.label}</span>
-          </a>
-        ))}
-      </div>
+          }}
+        >
+          <div className="social-icon-box">{item.icon}</div>
+          <span className="social-label">{item.label}</span>
+        </a>
+      ))}
     </div>
   )
 }
