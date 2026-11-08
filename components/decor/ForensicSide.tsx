@@ -37,6 +37,9 @@ export function ForensicSide({ isMobile = false, className = "" }: ForensicSideP
       {/* Far edge vertical gold light glow beam */}
       <div className="absolute right-0 top-0 bottom-0 w-2 bg-gradient-to-l from-amber-500/30 to-transparent blur-sm" />
 
+      {/* Top gold cyber ambience touching header boundary */}
+      <div className="absolute left-0 top-0 right-0 h-10 bg-gradient-to-b from-amber-500/20 via-amber-400/6 to-transparent pointer-events-none" />
+
       {/* Rising gold dust particles on right side */}
       <GoldDust count={isMobile ? 8 : 18} />
 

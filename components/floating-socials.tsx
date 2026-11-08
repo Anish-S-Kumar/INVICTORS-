@@ -145,15 +145,15 @@ export function FloatingSocials() {
       <style jsx>{`
         /* =========================================================================
            CONTAINER SIZING & SPACING:
-           Spans the width with left, center, and right distribution.
+           Spans full width with left, center, and right distribution.
            Pure transparent background - no solid black box.
            ========================================================================= */
         .smoke-socials-wrapper {
           position: relative;
           width: 100%;
-          max-width: 1200px;
+          max-width: 1360px;
           margin: 0 auto;
-          padding: 4px 16px;
+          padding: 2px 24px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -164,24 +164,24 @@ export function FloatingSocials() {
 
         @media (max-width: 768px) {
           .smoke-socials-wrapper {
-            padding: 4px 10px;
+            padding: 2px 10px;
           }
         }
 
-        /* Ambient floating wave keyframes */
-        @keyframes floatGently {
+        /* Synchronized gentle floating animation: ALL logos move together simultaneously */
+        @keyframes floatTogether {
           0%, 100% {
             transform: translateY(0px);
           }
           50% {
-            transform: translateY(-3px);
+            transform: translateY(-5px);
           }
         }
 
         /* Breathing radiance for golden aura */
         @keyframes goldAuraGlow {
           0%, 100% {
-            opacity: 0.5;
+            opacity: 0.45;
             transform: scale(1);
           }
           50% {
@@ -191,9 +191,9 @@ export function FloatingSocials() {
         }
 
         /* =========================================================================
-           TRANSLUCENT GLASS SOCIAL PILL:
-           Blends seamlessly with the dark circuit/neural canvas.
-           No plane black background.
+           TRANSPARENT GOLD SOCIAL PILL:
+           Directly on the home page background with NO blank black ground.
+           Circuit lines, gold dust and neural network show right through!
            ========================================================================= */
         .smoke-social-pill {
           position: relative;
@@ -202,14 +202,13 @@ export function FloatingSocials() {
           gap: 8px;
           padding: 4px 12px 4px 6px;
           border-radius: 9999px;
-          /* Translucent amber glass border with zero solid black fill */
-          border: 1px solid rgba(230, 190, 80, 0.45);
-          background: rgba(18, 14, 8, 0.35);
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+          /* Transparent with luminous golden border and zero black fill or blur */
+          border: 1px solid rgba(230, 190, 80, 0.55);
+          background: rgba(212, 162, 76, 0.05);
+          box-shadow: 0 0 14px rgba(212, 162, 76, 0.25), inset 0 0 6px rgba(255, 220, 120, 0.12);
           cursor: pointer;
           text-decoration: none;
-          animation: floatGently 4s ease-in-out infinite;
+          animation: floatTogether 3.5s ease-in-out infinite;
           transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
                       border-color 0.25s ease,
                       background 0.25s ease,
@@ -218,15 +217,11 @@ export function FloatingSocials() {
           -webkit-tap-highlight-color: transparent;
         }
 
-        /* Staggered float delays */
-        .smoke-social-pill.item-0 {
-          animation-delay: 0s;
-        }
-        .smoke-social-pill.item-1 {
-          animation-delay: 1.3s;
-        }
+        /* Synchronized: All items move together at the exact same time (0s delay) */
+        .smoke-social-pill.item-0,
+        .smoke-social-pill.item-1,
         .smoke-social-pill.item-2 {
-          animation-delay: 2.6s;
+          animation-delay: 0s;
         }
 
         /* Icon round translucent container */
@@ -237,8 +232,9 @@ export function FloatingSocials() {
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          background: rgba(230, 190, 80, 0.12);
-          border: 1px solid rgba(240, 205, 110, 0.5);
+          background: rgba(230, 190, 80, 0.18);
+          border: 1px solid rgba(240, 205, 110, 0.65);
+          box-shadow: 0 0 8px rgba(212, 162, 76, 0.35);
           shrink: 0;
         }
 
@@ -287,7 +283,7 @@ export function FloatingSocials() {
         .smoke-social-pill:hover {
           transform: scale(1.08) translateY(-2px);
           border-color: #ffd868;
-          background: rgba(45, 32, 14, 0.5);
+          background: rgba(212, 162, 76, 0.15);
           box-shadow: 0 0 20px rgba(250, 210, 110, 0.8),
                       inset 0 0 8px rgba(245, 205, 100, 0.3) !important;
         }
@@ -313,7 +309,7 @@ export function FloatingSocials() {
           border-radius: 9999px;
           background: var(--trail-gradient);
           filter: blur(8px);
-          opacity: 0.6;
+          opacity: 0.5;
           pointer-events: none;
           z-index: -1;
           animation: goldAuraGlow 3s ease-in-out infinite;
