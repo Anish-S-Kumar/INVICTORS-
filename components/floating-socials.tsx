@@ -146,11 +146,12 @@ export function FloatingSocials() {
            CONTAINER SIZING:
            Wide drifting lane spanning the full width with pure transparent background.
            No plane black box to cover the background.
+           Taller height with overflow-y visible so icons and glow never get clipped!
            ========================================================================= */
         .smoke-socials-wrapper {
           position: relative;
           width: 100%;
-          height: 38px;
+          height: 52px;
           overflow-x: hidden;
           overflow-y: visible;
           background: transparent !important;
@@ -169,7 +170,7 @@ export function FloatingSocials() {
 
         @media (max-width: 768px) {
           .smoke-socials-wrapper {
-            height: 34px;
+            height: 46px;
           }
         }
 
@@ -218,8 +219,9 @@ export function FloatingSocials() {
           display: flex;
           align-items: center;
           /* Extra wide spacing between the 3 items */
-          gap: 48px;
+          gap: 52px;
           white-space: nowrap;
+          padding: 8px 0;
           animation: convoyDrift 24s linear infinite;
           will-change: transform, opacity, filter;
         }
@@ -253,7 +255,7 @@ export function FloatingSocials() {
           display: inline-flex;
           align-items: center;
           gap: 9px;
-          padding: 4px 14px 4px 6px;
+          padding: 5px 14px 5px 7px;
           border-radius: 9999px;
           /* Translucent glass border & background to fit the dark canvas */
           border: 1px solid rgba(230, 190, 80, 0.45);
@@ -262,6 +264,7 @@ export function FloatingSocials() {
           -webkit-backdrop-filter: blur(8px);
           cursor: pointer;
           text-decoration: none;
+          box-sizing: border-box;
           transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
                       border-color 0.25s ease,
                       background 0.25s ease,
@@ -275,18 +278,19 @@ export function FloatingSocials() {
           display: flex;
           align-items: center;
           justify-content: center;
-          width: 24px;
-          height: 24px;
+          width: 26px;
+          height: 26px;
           border-radius: 50%;
           background: rgba(230, 190, 80, 0.12);
           border: 1px solid rgba(240, 205, 110, 0.5);
           shrink: 0;
+          overflow: visible;
         }
 
         /* Luminous gold SVG */
         .smoke-social-pill :global(.social-svg) {
-          width: 14px;
-          height: 14px;
+          width: 15px;
+          height: 15px;
           color: #fce494;
           filter: drop-shadow(0 0 5px rgba(245, 205, 110, 0.85));
           transition: color 0.2s ease, filter 0.2s ease;
