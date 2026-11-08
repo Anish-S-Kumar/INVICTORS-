@@ -1,11 +1,10 @@
 "use client"
 
-import React, { useState, useEffect, useRef } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ChevronLeft, Users, UserPlus, ChevronRight, ExternalLink } from "lucide-react"
+import { ChevronLeft, UserPlus, ExternalLink } from "lucide-react"
 import { FloatingSocials } from "@/components/floating-socials"
-import { TeamModal } from "@/components/team-modal"
 import { MEMBERSHIP_GOOGLE_FORM_URL } from "@/lib/membership-config"
 
 interface HeaderProps {
@@ -28,8 +27,6 @@ export function Header({
 }: HeaderProps) {
   const middleColRef = useRef<HTMLDivElement>(null)
   const [colWidth, setColWidth] = useState<number>(300)
-  const [isTeamModalOpen, setIsTeamModalOpen] = useState(false)
-
   // Measure middle column width to switch between full and abbreviated department line on small screens (<250px)
   useEffect(() => {
     const el = middleColRef.current
@@ -144,25 +141,14 @@ export function Header({
           </div>
         </div>
 
-        {/* HOME PAGE ONLY: Core Team / Membership option bar */}
+        {/* HOME PAGE ONLY: Membership option bar */}
         {showHomeExtras && (
           <div className="w-full flex items-center justify-center gap-2 pb-1.5 px-3 pointer-events-auto">
-            <button
-              type="button"
-              onClick={() => setIsTeamModalOpen(true)}
-              className="group relative inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-amber-400/50 bg-black/80 hover:bg-amber-950/60 hover:border-amber-300 text-amber-200 text-[11px] sm:text-xs font-display tracking-wider uppercase transition-all shadow-[0_0_12px_rgba(212,162,76,0.18)] hover:shadow-[0_0_22px_rgba(212,162,76,0.4)] hover:scale-[1.02] cursor-pointer backdrop-blur-md"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_6px_#d4a24c]" />
-              <Users className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="text-amber-200 group-hover:text-amber-100 font-semibold">Core Team & Faculty Coordinators</span>
-              <ChevronRight className="w-3 h-3 text-amber-400/70 group-hover:translate-x-0.5 transition-transform" />
-            </button>
-
             <a
               href={MEMBERSHIP_GOOGLE_FORM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-600/20 via-amber-500/25 to-amber-600/20 hover:border-amber-300 hover:from-amber-500/30 hover:to-amber-400/30 text-amber-200 text-[11px] sm:text-xs font-display tracking-wider uppercase transition-all shadow-[0_0_12px_rgba(212,162,76,0.18)] hover:shadow-[0_0_20px_rgba(212,162,76,0.4)] cursor-pointer backdrop-blur-md"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/40 bg-gradient-to-r from-amber-600/20 via-amber-500/25 to-amber-600/20 hover:border-amber-300 hover:from-amber-500/30 hover:to-amber-400/30 text-amber-200 text-[11px] sm:text-xs font-display tracking-wider uppercase transition-all shadow-[0_0_12px_rgba(212,162,76,0.18)] hover:shadow-[0_0_20px_rgba(212,162,76,0.4)] cursor-pointer backdrop-blur-md"
               title="Apply for INVICTORS Membership (Google Form)"
             >
               <UserPlus className="w-3.5 h-3.5 text-amber-300" />
@@ -185,13 +171,6 @@ export function Header({
         </div>
       )}
 
-      {/* Interactive Core Team & Membership Modal (only needed when showHomeExtras) */}
-      {showHomeExtras && (
-        <TeamModal
-          isOpen={isTeamModalOpen}
-          onClose={() => setIsTeamModalOpen(false)}
-        />
-      )}
     </header>
   )
 }
