@@ -146,12 +146,12 @@ export function FloatingSocials() {
            CONTAINER SIZING:
            Wide drifting lane spanning the full width with pure transparent background.
            No plane black box to cover the background.
-           Taller height with overflow-y visible so icons and glow never get clipped!
+           Taller height with overflow visible so icons and glow never get clipped!
            ========================================================================= */
         .smoke-socials-wrapper {
           position: relative;
           width: 100%;
-          height: 52px;
+          min-height: 56px;
           overflow-x: hidden;
           overflow-y: visible;
           background: transparent !important;
@@ -159,6 +159,7 @@ export function FloatingSocials() {
           user-select: none;
           display: flex;
           align-items: center;
+          padding: 6px 0;
         }
 
         /* Desktop hover-to-pause */
@@ -170,7 +171,8 @@ export function FloatingSocials() {
 
         @media (max-width: 768px) {
           .smoke-socials-wrapper {
-            height: 46px;
+            min-height: 48px;
+            padding: 4px 0;
           }
         }
 
@@ -221,7 +223,7 @@ export function FloatingSocials() {
           /* Extra wide spacing between the 3 items */
           gap: 52px;
           white-space: nowrap;
-          padding: 8px 0;
+          padding: 12px 0;
           animation: convoyDrift 24s linear infinite;
           will-change: transform, opacity, filter;
         }

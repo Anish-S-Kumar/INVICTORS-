@@ -174,7 +174,7 @@ export function Header({
       </div>
 
       {/* Floating Smoky Social Media Strip placed BELOW the center gold dot and adjacent lines */}
-      <div className="w-full relative z-20 pointer-events-auto overflow-visible py-1.5">
+      <div className="w-full relative z-20 pointer-events-auto overflow-visible py-2">
         <FloatingSocials />
       </div>
 
