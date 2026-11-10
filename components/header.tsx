@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeft, UserPlus, ExternalLink } from "lucide-react"
+import { FloatingSocials } from "@/components/floating-socials"
 import { MEMBERSHIP_GOOGLE_FORM_URL } from "@/lib/membership-config"
 
 interface HeaderProps {
@@ -162,6 +163,14 @@ export function Header({
           <div className="w-1.5 h-1.5 rotate-45 border border-amber-300 bg-amber-500/80 shadow-[0_0_6px_rgba(212,162,76,0.8)] -translate-y-[0.5px]" />
         </div>
       </div>
+
+      {/* HOME PAGE ONLY: Social media strip below the gold divider line */}
+      {showHomeExtras && (
+        <div className="w-full relative z-20 pointer-events-auto overflow-visible py-1.5">
+          <FloatingSocials />
+        </div>
+      )}
+
     </header>
   )
 }

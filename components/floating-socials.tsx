@@ -137,36 +137,6 @@ export function FloatingSocials() {
     },
   ]
 
-  const renderSocialSet = (setKey: string) => (
-    <div key={setKey} className="smoke-socials-set">
-      {socials.map((item) => (
-        <a
-          key={`${setKey}-${item.id}`}
-          href={item.href}
-          target={item.href.startsWith("mailto:") ? undefined : "_blank"}
-          rel={item.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
-          aria-label={`${item.label} on ${item.name}`}
-          title={`${item.label} (${item.name})`}
-          className="smoke-social-pill"
-          style={
-            {
-              boxShadow: `0 0 14px ${item.glowColor}, inset 0 1px 2px rgba(250, 220, 140, 0.25)`,
-              "--trail-gradient": item.trailGradient,
-            } as React.CSSProperties
-          }
-          onClick={(e) => {
-            if (isLongPressRef.current) {
-              e.preventDefault()
-            }
-          }}
-        >
-          <div className="social-icon-box">{item.icon}</div>
-          <span className="social-label">{item.label}</span>
-        </a>
-      ))}
-    </div>
-  )
-
   return (
     <div
       className="smoke-socials-wrapper"
@@ -174,79 +144,44 @@ export function FloatingSocials() {
     >
       <style jsx>{`
         /* =========================================================================
-           CONTAINER: Full-width wrapper with overflow hidden
-           Pure transparent background - no black box.
+           CONTAINER SIZING & SPACING:
+           Spans the width with left, center, and right distribution.
+           Pure transparent background - no solid black box.
            ========================================================================= */
         .smoke-socials-wrapper {
           position: relative;
           width: 100%;
-          overflow: hidden;
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 4px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           background: transparent !important;
           pointer-events: auto;
           user-select: none;
-          padding: 2px 0;
-          mask-image: linear-gradient(
-            to right,
-            transparent 0%,
-            black 4%,
-            black 96%,
-            transparent 100%
-          );
-          -webkit-mask-image: linear-gradient(
-            to right,
-            transparent 0%,
-            black 4%,
-            black 96%,
-            transparent 100%
-          );
-        }
-
-        /* Hover pauses the movement so user can easily click any button */
-        .smoke-socials-wrapper:hover .smoke-socials-track {
-          animation-play-state: paused;
-        }
-
-        /* Track moving strictly in a horizontal line from left to right */
-        .smoke-socials-track {
-          display: flex;
-          align-items: center;
-          width: max-content;
-          animation: moveLeftToRight 28s linear infinite;
-          will-change: transform;
-        }
-
-        /* Seamless left-to-right translation in straight horizontal line (no waving) */
-        @keyframes moveLeftToRight {
-          0% {
-            transform: translate3d(-50%, 0, 0);
-          }
-          100% {
-            transform: translate3d(0%, 0, 0);
-          }
-        }
-
-        /* Each set spans 100vw so the three logos are widely spaced across the entire screen */
-        .smoke-socials-set {
-          display: flex;
-          align-items: center;
-          justify-content: space-around;
-          min-width: 100vw;
-          padding: 0 24px;
-          flex-shrink: 0;
         }
 
         @media (max-width: 768px) {
-          .smoke-socials-set {
-            min-width: 125vw;
-            justify-content: space-around;
-            padding: 0 16px;
+          .smoke-socials-wrapper {
+            padding: 4px 10px;
+          }
+        }
+
+        /* Ambient floating wave keyframes */
+        @keyframes floatGently {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-3px);
           }
         }
 
         /* Breathing radiance for golden aura */
         @keyframes goldAuraGlow {
           0%, 100% {
-            opacity: 0.45;
+            opacity: 0.5;
             transform: scale(1);
           }
           50% {
@@ -256,30 +191,42 @@ export function FloatingSocials() {
         }
 
         /* =========================================================================
-           TRANSPARENT GOLD SOCIAL PILL:
-           Directly on the home page background with NO blank black ground.
-           Circuit lines, gold dust and neural network show right through!
+           TRANSLUCENT GLASS SOCIAL PILL:
+           Blends seamlessly with the dark circuit/neural canvas.
+           No plane black background.
            ========================================================================= */
         .smoke-social-pill {
           position: relative;
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 4px 14px 4px 6px;
+          padding: 4px 12px 4px 6px;
           border-radius: 9999px;
-          /* Transparent with luminous golden border and zero black fill or blur */
-          border: 1px solid rgba(230, 190, 80, 0.55);
-          background: rgba(212, 162, 76, 0.05);
-          box-shadow: 0 0 14px rgba(212, 162, 76, 0.25), inset 0 0 6px rgba(255, 220, 120, 0.12);
+          /* Translucent amber glass border with zero solid black fill */
+          border: 1px solid rgba(230, 190, 80, 0.45);
+          background: rgba(18, 14, 8, 0.35);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
           cursor: pointer;
           text-decoration: none;
+          animation: floatGently 4s ease-in-out infinite;
           transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
                       border-color 0.25s ease,
                       background 0.25s ease,
                       box-shadow 0.25s ease;
           touch-action: manipulation;
           -webkit-tap-highlight-color: transparent;
-          flex-shrink: 0;
+        }
+
+        /* Staggered float delays */
+        .smoke-social-pill.item-0 {
+          animation-delay: 0s;
+        }
+        .smoke-social-pill.item-1 {
+          animation-delay: 1.3s;
+        }
+        .smoke-social-pill.item-2 {
+          animation-delay: 2.6s;
         }
 
         /* Icon round translucent container */
@@ -290,10 +237,9 @@ export function FloatingSocials() {
           width: 24px;
           height: 24px;
           border-radius: 50%;
-          background: rgba(230, 190, 80, 0.18);
-          border: 1px solid rgba(240, 205, 110, 0.65);
-          box-shadow: 0 0 8px rgba(212, 162, 76, 0.35);
-          flex-shrink: 0;
+          background: rgba(230, 190, 80, 0.12);
+          border: 1px solid rgba(240, 205, 110, 0.5);
+          shrink: 0;
         }
 
         /* Luminous gold SVG */
@@ -320,7 +266,7 @@ export function FloatingSocials() {
 
         @media (max-width: 768px) {
           .smoke-social-pill {
-            padding: 3px 10px 3px 4px;
+            padding: 3px 8px 3px 4px;
             gap: 5px;
           }
           .social-icon-box {
@@ -339,9 +285,9 @@ export function FloatingSocials() {
 
         /* Hover & Tap: Intensify gold radiance and glow without changing blackness */
         .smoke-social-pill:hover {
-          transform: scale(1.08) translateY(-1px);
+          transform: scale(1.08) translateY(-2px);
           border-color: #ffd868;
-          background: rgba(212, 162, 76, 0.18);
+          background: rgba(45, 32, 14, 0.5);
           box-shadow: 0 0 20px rgba(250, 210, 110, 0.8),
                       inset 0 0 8px rgba(245, 205, 100, 0.3) !important;
         }
@@ -367,28 +313,45 @@ export function FloatingSocials() {
           border-radius: 9999px;
           background: var(--trail-gradient);
           filter: blur(8px);
-          opacity: 0.5;
+          opacity: 0.6;
           pointer-events: none;
           z-index: -1;
           animation: goldAuraGlow 3s ease-in-out infinite;
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .smoke-socials-track {
+          .smoke-social-pill {
             animation: none !important;
           }
         }
       `}</style>
 
-      <div
-        className="smoke-socials-track"
-        style={{
-          animationPlayState: isPaused ? "paused" : "running",
-        }}
-      >
-        {renderSocialSet("set-1")}
-        {renderSocialSet("set-2")}
-      </div>
+      {socials.map((item, index) => (
+        <a
+          key={item.id}
+          href={item.href}
+          target={item.href.startsWith("mailto:") ? undefined : "_blank"}
+          rel={item.href.startsWith("mailto:") ? undefined : "noopener noreferrer"}
+          aria-label={`${item.label} on ${item.name}`}
+          title={`${item.label} (${item.name})`}
+          className={`smoke-social-pill item-${index}`}
+          style={
+            {
+              boxShadow: `0 0 12px ${item.glowColor}, inset 0 1px 2px rgba(250, 220, 140, 0.25)`,
+              "--trail-gradient": item.trailGradient,
+              animationPlayState: isPaused ? "paused" : "running",
+            } as React.CSSProperties
+          }
+          onClick={(e) => {
+            if (isLongPressRef.current) {
+              e.preventDefault()
+            }
+          }}
+        >
+          <div className="social-icon-box">{item.icon}</div>
+          <span className="social-label">{item.label}</span>
+        </a>
+      ))}
     </div>
   )
 }

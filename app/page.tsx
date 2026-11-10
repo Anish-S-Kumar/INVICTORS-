@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react"
 import { Header } from "@/components/header"
-import { FloatingSocials } from "@/components/floating-socials"
 import { IntroVideo } from "@/components/intro-video"
 import { DashboardWrapper } from "@/components/dashboard-wrapper"
 import { CLUB_METADATA } from "@/lib/content"
@@ -55,11 +54,6 @@ export default function HomePage() {
         }`}
       >
         <DashboardWrapper isIntroPlaying={!introFinished} />
-
-        {/* Floating Social Media Buttons - overlays the home page background directly below the header boundary */}
-        <div className="absolute top-2 sm:top-2.5 inset-x-0 z-30 pointer-events-auto">
-          <FloatingSocials />
-        </div>
 
         {/* Row 3: One-line footer overlaid on laptop ONLY (hidden on mobile to clear gesture bar) */}
         <div className="hidden lg:flex absolute bottom-1 inset-x-0 z-20 pointer-events-none items-center justify-center px-4">

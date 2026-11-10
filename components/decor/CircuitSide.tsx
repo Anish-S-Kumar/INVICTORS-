@@ -37,9 +37,6 @@ export function CircuitSide({ isMobile = false, className = "" }: CircuitSidePro
       {/* Dark tech backdrop overlay */}
       <div className="absolute inset-0 bg-gradient-to-r from-[#030305]/90 via-[#07070b]/60 to-transparent" />
 
-      {/* Top gold cyber ambience touching header boundary */}
-      <div className="absolute left-0 top-0 right-0 h-10 bg-gradient-to-b from-amber-500/25 via-amber-400/8 to-transparent pointer-events-none" />
-
       {/* Far edge vertical gold cyber light beam */}
       <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-amber-500/50 via-amber-400/20 to-transparent blur-sm" />
 
