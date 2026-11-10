@@ -3,16 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { Volume2, VolumeX, ArrowRight, CornerRightDown } from "lucide-react"
+import { ArrowRight, CornerRightDown } from "lucide-react"
 import { NAVIGATION_CARDS, CLUB_METADATA } from "@/lib/content"
-import {
-  initDialAudio,
-  playDialTick,
-  playDialDetent,
-  playOpenChime,
-  setDialSoundMuted,
-  isDialSoundMuted,
-} from "@/lib/dial-sound"
 import { smoothDamp } from "@/lib/smooth-damp"
 
 const DIAL_ITEMS = [
@@ -28,7 +20,6 @@ export function MobileRotaryDial() {
   const router = useRouter()
 
   const [selectedIndex, setSelectedIndex] = useState<number>(0)
-  const [isMuted, setIsMuted] = useState<boolean>(false)
   const [hasInteracted, setHasInteracted] = useState<boolean>(false)
   const [dimensions, setDimensions] = useState({ width: 390, height: 750, isLandscape: false })
 
@@ -63,9 +54,6 @@ export function MobileRotaryDial() {
     updateSize()
     window.addEventListener("resize", updateSize)
     window.addEventListener("orientationchange", updateSize)
-
-    // Load initial mute state
-    setIsMuted(isDialSoundMuted())
 
     return () => {
       window.removeEventListener("resize", updateSize)
@@ -105,10 +93,6 @@ export function MobileRotaryDial() {
         // Tick sounds during snapping movement
         const degDiff = nextAngle - lastTickDegRef.current
         if (Math.abs(degDiff) >= 10) {
-          const ticks = Math.floor(Math.abs(degDiff) / 10)
-          for (let i = 0; i < Math.min(3, ticks); i++) {
-            playDialTick(velocityRef.current.value / 100)
-          }
           lastTickDegRef.current = nextAngle
         }
 
@@ -131,7 +115,6 @@ export function MobileRotaryDial() {
       if (normalizedDetent !== selectedIndexRef.current) {
         selectedIndexRef.current = normalizedDetent
         setSelectedIndex(normalizedDetent)
-        playDialDetent()
       }
 
       // Update SVG rotation directly (bypassing React re-renders)
@@ -173,7 +156,6 @@ export function MobileRotaryDial() {
   // ANGULAR DRAG GESTURE (atan2 with pointer capture)
   // ---------------------------------------------------------------------------
   const handlePointerDown = (e: React.PointerEvent) => {
-    initDialAudio() // Unlock Web Audio context on mobile touch
     setHasInteracted(true)
 
     const zoneEl = zoneBRef.current
@@ -221,7 +203,6 @@ export function MobileRotaryDial() {
     // Tick sound every 10 degrees during drag
     const degFromLastTick = rotationAngleRef.current - lastTickDegRef.current
     if (Math.abs(degFromLastTick) >= 10) {
-      playDialTick(1)
       lastTickDegRef.current = rotationAngleRef.current
     }
 
@@ -268,7 +249,6 @@ export function MobileRotaryDial() {
 
   // Keyboard navigation
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    initDialAudio()
     setHasInteracted(true)
 
     if (e.key === "ArrowRight" || e.key === "ArrowDown") {
@@ -287,19 +267,10 @@ export function MobileRotaryDial() {
 
   // Handle opening selected section
   const handleOpenPage = () => {
-    playOpenChime()
     const activeItem = DIAL_ITEMS[selectedIndex]
     if (activeItem) {
       router.push(activeItem.href)
     }
-  }
-
-  // Toggle Mute
-  const handleToggleMute = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    const nextMuted = !isMuted
-    setIsMuted(nextMuted)
-    setDialSoundMuted(nextMuted)
   }
 
   const selectedItem = DIAL_ITEMS[selectedIndex] || DIAL_ITEMS[0]
@@ -471,16 +442,6 @@ export function MobileRotaryDial() {
           paddingBottom: "max(env(safe-area-inset-bottom, 0px), 10px)",
         }}
       >
-        {/* Mute / Unmute Toggle Button (Top-Right of Zone B, above rim) */}
-        <button
-          onClick={handleToggleMute}
-          aria-label={isMuted ? "Unmute dial sound" : "Mute dial sound"}
-          aria-pressed={isMuted}
-          className="absolute top-0 right-4 z-30 w-9 h-9 rounded-full border border-amber-500/30 bg-black/80 flex items-center justify-center text-amber-300 hover:text-amber-100 hover:border-amber-400 transition-all backdrop-blur-md cursor-pointer shadow-lg active:scale-95"
-        >
-          {isMuted ? <VolumeX className="w-4 h-4 text-silver-400" /> : <Volume2 className="w-4 h-4 text-amber-400" />}
-        </button>
-
         {/* "Turn the dial" Curved Hint above rim (Fades after first interaction) */}
         {!hasInteracted && (
           <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-500/30 bg-black/85 text-amber-300/90 text-[10.5px] font-display tracking-widest backdrop-blur-md animate-bounce shadow-md">

@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import { Volume2, VolumeX, FastForward } from "lucide-react"
 import { INTRO_CONFIG } from "@/lib/intro-config"
-import { initDialAudio } from "@/lib/dial-sound"
 import { IntroAnimation } from "@/components/intro-animation"
 
 interface IntroVideoProps {
@@ -15,7 +14,7 @@ export function IntroVideo({ onComplete }: IntroVideoProps) {
   const [isBuffering, setIsBuffering] = useState<boolean>(true)
   const [showSkip, setShowSkip] = useState<boolean>(false)
   const [autoplayBlocked, setAutoplayBlocked] = useState<boolean>(false)
-  const [isMuted, setIsMuted] = useState<boolean>(true)
+  const [isMuted, setIsMuted] = useState<boolean>(false)
   const [fadeVideoOut, setFadeVideoOut] = useState<boolean>(false)
   const [useFallback, setUseFallback] = useState<boolean>(false)
   const [isExited, setIsExited] = useState<boolean>(false)
@@ -128,12 +127,12 @@ export function IntroVideo({ onComplete }: IntroVideoProps) {
     }
   }, [handleFinish, onComplete])
 
-  // Try to start muted autoplay once src is set
+  // Try to start unmuted autoplay once src is set
   useEffect(() => {
     if (!videoSrc || !videoRef.current || useFallback) return
 
     const video = videoRef.current
-    video.muted = true
+    video.muted = false
 
     const playPromise = video.play()
     if (playPromise !== undefined) {
@@ -141,12 +140,41 @@ export function IntroVideo({ onComplete }: IntroVideoProps) {
         .then(() => {
           setIsBuffering(false)
           setAutoplayBlocked(false)
+          setIsMuted(false)
         })
         .catch((err) => {
-          console.warn("[IntroVideo] Autoplay blocked or deferred:", err)
-          setIsBuffering(false)
-          setAutoplayBlocked(true)
+          console.warn("[IntroVideo] Unmuted autoplay prevented by browser policy:", err)
+          // If browser requires user interaction for sound, play video and unmute on first tap
+          video.muted = true
+          setIsMuted(true)
+          video.play()
+            .then(() => {
+              setIsBuffering(false)
+              setAutoplayBlocked(false)
+            })
+            .catch(() => {
+              setIsBuffering(false)
+              setAutoplayBlocked(true)
+            })
         })
+    }
+
+    // Unmute automatically on the very first user interaction anywhere on the page
+    const unlockAudio = () => {
+      if (videoRef.current && videoRef.current.muted) {
+        videoRef.current.muted = false
+        setIsMuted(false)
+      }
+    }
+
+    window.addEventListener("pointerdown", unlockAudio, { once: true })
+    window.addEventListener("touchstart", unlockAudio, { once: true })
+    window.addEventListener("click", unlockAudio, { once: true })
+
+    return () => {
+      window.removeEventListener("pointerdown", unlockAudio)
+      window.removeEventListener("touchstart", unlockAudio)
+      window.removeEventListener("click", unlockAudio)
     }
   }, [videoSrc, useFallback])
 
@@ -165,7 +193,6 @@ export function IntroVideo({ onComplete }: IntroVideoProps) {
 
   // Handle unmute / manual play
   const handleUserPlayOrUnmute = () => {
-    initDialAudio() // Unlock dial audio context on this user gesture
     if (videoRef.current) {
       if (autoplayBlocked) {
         videoRef.current.muted = false
