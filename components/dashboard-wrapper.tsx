@@ -6,9 +6,6 @@ import { WorksWheel } from "@/components/ui/works-wheel"
 import { MobileRotaryDial } from "@/components/ui/mobile-rotary-dial"
 import { CLUB_METADATA } from "@/lib/content"
 
-import { CircuitSide } from "@/components/decor/CircuitSide"
-import { ForensicSide } from "@/components/decor/ForensicSide"
-
 interface DashboardWrapperProps {
   isIntroPlaying?: boolean
 }
@@ -52,14 +49,6 @@ export function DashboardWrapper({ isIntroPlaying = false }: DashboardWrapperPro
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
-      {/* Subtle Animated Side Backgrounds (Masked, non-competing, paused during intro) */}
-      {!isIntroPlaying && (
-        <>
-          <CircuitSide isMobile={!isDesktop} />
-          <ForensicSide isMobile={!isDesktop} />
-        </>
-      )}
-
       {/* Main Wheel Engine: WorksWheel for Desktop, MobileRotaryDial for Mobile */}
       {isDesktop ? <WorksWheel /> : <MobileRotaryDial />}
     </div>

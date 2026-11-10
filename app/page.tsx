@@ -4,8 +4,9 @@ import React, { useState, useEffect } from "react"
 import { Header } from "@/components/header"
 import { IntroVideo } from "@/components/intro-video"
 import { DashboardWrapper } from "@/components/dashboard-wrapper"
+import { CircuitSide } from "@/components/decor/CircuitSide"
+import { ForensicSide } from "@/components/decor/ForensicSide"
 import { CLUB_METADATA } from "@/lib/content"
-
 import { DebugOverlay } from "@/components/debug-overlay"
 
 export default function HomePage() {
@@ -37,13 +38,21 @@ export default function HomePage() {
       {/* Dev-only alignment & concentricity debug overlay (?debug=1) */}
       <DebugOverlay />
 
+      {/* Full-page background decor — fixed so it spans behind header AND dashboard */}
+      {introFinished && (
+        <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
+          <CircuitSide />
+          <ForensicSide />
+        </div>
+      )}
+
       {/* Cinematic Intro Video Overlay */}
       {!introFinished && (
         <IntroVideo onComplete={() => setIntroFinished(true)} />
       )}
 
       {/* Row 1: Slim Header (64px mobile, 72px laptop) - fades in when intro ends */}
-      <div className={`transition-opacity duration-700 ease-out ${introFinished ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
+      <div className={`relative z-40 transition-opacity duration-700 ease-out ${introFinished ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
         <Header showHomeExtras={true} />
       </div>
 
